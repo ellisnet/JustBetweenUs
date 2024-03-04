@@ -1,0 +1,247 @@
+﻿using JustBetweenUs.Encryption.Services;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+
+// ReSharper disable once CheckNamespace
+namespace JustBetweenUs.ViewModels;
+
+public interface ICopyToClipboard
+{
+    Action<string> CopyTextToClipboard { get; set; }
+}
+
+public class MainViewModel : SimpleViewModel, ICopyToClipboard
+{
+    private IEncryptionService _encryptSvc;
+    private bool _copyMessageShown;
+
+    public MainViewModel()
+    {
+        if (!IsDesignMode(true))
+        {
+            Debug.WriteLine("Main view model startup.");
+
+            _encryptSvc = GetService<IEncryptionService>();
+
+            EncryptionModes.Clear();
+            foreach (var kvp in _encryptionModeDictionary)
+            {
+                EncryptionModes.Add(kvp.Value.Description);
+            }
+            var selection = _encryptionModeDictionary.First();
+            _selectedEncryptionMode = selection.Key;
+            _selectedEncryptionModeText = selection.Value.Description;
+            base.NotifyPropertyChanged(nameof(EncryptionModes));
+            base.NotifyPropertyChanged(nameof(SelectedEncryptionModeText));
+
+            // ReSharper disable once AsyncVoidLambda
+            new Task(async () => //intentionally a fire-and-forget task
+            {
+                EncryptionKey = await _encryptSvc.GetDefaultKey();
+                await Task.Delay(2000);
+                await ShowInfo("This application is adapted from a sample provided by Paul Ainsworth.");
+            }).Start();
+        }
+    }
+
+    #region | Bindable properties |
+
+    #region Select encryption mode
+
+    private readonly Dictionary<EncryptionMode.CryptAlgorithm, EncryptionMode> _encryptionModeDictionary =
+        EncryptionMode.GetDictionary();
+
+    public List<string> EncryptionModes { get; } = new();
+
+    private EncryptionMode.CryptAlgorithm _selectedEncryptionMode;
+
+    private string _selectedEncryptionModeText = string.Empty;
+
+    public string SelectedEncryptionModeText
+    {
+        get => _selectedEncryptionModeText;
+        set
+        {
+            SetProperty(ref _selectedEncryptionModeText, value);
+            _selectedEncryptionMode = _encryptionModeDictionary
+                .Single(s => s.Value.Description == value)
+                .Key;
+        }
+    }
+
+    #endregion
+
+    private string _encryptionKey = string.Empty;
+    [AffectsCommands(nameof(EncryptCommand), nameof(DecryptCommand))]
+    public string EncryptionKey
+    {
+        get => _encryptionKey;
+        set => SetProperty(ref _encryptionKey, value ?? string.Empty);
+    }
+
+    private string _enteredText = string.Empty;
+    [AffectsCommands(nameof(EncryptCommand), nameof(DecryptCommand))]
+    public string EnteredText
+    {
+        get => _enteredText;
+        set => SetProperty(ref _enteredText, value ?? string.Empty);
+    }
+
+    private string _processedText = string.Empty;
+    [AffectsCommands(nameof(CopyToClipboardCommand))]
+    public string ProcessedText
+    {
+        get => _processedText;
+        set => SetProperty(ref _processedText, value ?? string.Empty);
+    }
+
+    #endregion
+
+    #region | Commands and their implementations |
+
+    #region EncryptCommand
+
+    private SimpleCommand _encryptCommand;
+    public SimpleCommand EncryptCommand => 
+        (_encryptCommand ??= new SimpleCommand(CanEncrypt, DoEncrypt));
+
+    private bool CanEncrypt() => 
+        (!string.IsNullOrWhiteSpace(EncryptionKey)) && (!string.IsNullOrWhiteSpace(EnteredText));
+
+    private async Task DoEncrypt()
+    {
+        if (CanEncrypt())
+        {
+            try
+            {
+                switch (_selectedEncryptionMode)
+                {
+                    case EncryptionMode.CryptAlgorithm.Aes:
+                        ProcessedText = await _encryptSvc.AES_EncryptToBase64(EncryptionKey.Trim(), EnteredText);
+                        break;
+
+                    case EncryptionMode.CryptAlgorithm.TripleDes:
+                        ProcessedText = await _encryptSvc.OriginalTripleDES_EncryptToBase64(EncryptionKey.Trim(), EnteredText);
+                        break;
+                    
+                    case EncryptionMode.CryptAlgorithm.Twofish:
+                        ProcessedText = await _encryptSvc.Twofish_EncryptToBase64(EncryptionKey.Trim(), EnteredText);
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                await ShowError($"Error while encrypting: {e.Message}");
+            }
+        }
+    }
+
+    #endregion
+
+    #region DecryptCommand
+
+    private SimpleCommand _decryptCommand;
+    public SimpleCommand DecryptCommand =>
+        (_decryptCommand ??= new SimpleCommand(CanDecrypt, DoDecrypt));
+
+    private bool CanDecrypt() =>
+        (!string.IsNullOrWhiteSpace(EncryptionKey)) 
+        && (!string.IsNullOrWhiteSpace(EnteredText));
+        //&& IsBase64Text(EnteredText); //Too distracting to have the button flash on and off
+
+    private async Task DoDecrypt()
+    {
+        if (CanDecrypt())
+        {
+            if (!_encryptSvc.IsBase64Text(EnteredText))
+            {
+                await ShowInfo("The specified text does not look like it is encrypted.");
+            }
+            else
+            {
+                try
+                {
+                    switch (_selectedEncryptionMode)
+                    {
+                        case EncryptionMode.CryptAlgorithm.Aes:
+                            ProcessedText = await _encryptSvc.AES_DecryptFromBase64(EncryptionKey.Trim(), EnteredText);
+                            break;
+
+                        case EncryptionMode.CryptAlgorithm.TripleDes:
+                            ProcessedText = await _encryptSvc.OriginalTripleDES_DecryptFromBase64(EncryptionKey.Trim(), EnteredText);
+                            break;
+
+                        case EncryptionMode.CryptAlgorithm.Twofish:
+                            ProcessedText = await _encryptSvc.Twofish_DecryptFromBase64(EncryptionKey.Trim(), EnteredText);
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    await ShowError($"Error while decrypting: {e.Message}");
+                }
+            }
+        }
+    }
+
+    #endregion
+
+    #region CopyToClipboardCommand
+
+    private SimpleCommand _copyToClipboardCommand;
+    public SimpleCommand CopyToClipboardCommand =>
+        (_copyToClipboardCommand ??= new SimpleCommand(CanCopyToClipboard, DoCopyToClipboard));
+
+    private bool CanCopyToClipboard() => (!string.IsNullOrWhiteSpace(ProcessedText));
+
+    private async Task DoCopyToClipboard()
+    {
+        if (CanCopyToClipboard())
+        {
+            if (CopyTextToClipboard != null)
+            {
+                InvokeOnMainThread(() => CopyTextToClipboard(ProcessedText));
+                if (!_copyMessageShown)
+                {
+                    _copyMessageShown = true;
+                    await ShowInfo("The processed text has been copied to the system clipboard.");
+                }
+            }
+            else
+            {
+                await ShowError(
+                    "This platform implementation does not have the Copy-to-clipboard functionality enabled.");
+            }
+        }
+    }
+
+    #endregion
+
+    #endregion
+
+    #region | ICopyToClipboard implementation |
+
+    public Action<string> CopyTextToClipboard { get; set; }
+
+    #endregion
+
+    #region | IDisposable implementation |
+
+    public override void Dispose()
+    {
+        _encryptSvc = null;
+        _encryptCommand?.Dispose();
+        _encryptCommand = null;
+        _decryptCommand?.Dispose();
+        _decryptCommand = null;
+        _copyToClipboardCommand?.Dispose();
+        _copyToClipboardCommand = null;
+        CopyTextToClipboard = null;
+        base.Dispose();
+    }
+
+    #endregion
+}

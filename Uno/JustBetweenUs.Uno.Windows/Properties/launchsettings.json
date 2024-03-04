@@ -1,0 +1,10 @@
+{
+	"profiles": {
+		"JustBetweenUs.Uno.Windows (Unpackaged)": {
+			"commandName": "Project"
+		},
+		"JustBetweenUs.Uno.Windows (Package)": {
+			"commandName": "MsixPackage"
+		}
+	}
+}

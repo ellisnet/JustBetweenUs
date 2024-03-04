@@ -1,0 +1,72 @@
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:JustBetweenUs.ViewModels"
+             x:Class="JustBetweenUs.Views.MainPage">
+
+    <ContentPage.BindingContext>
+        <vm:MainViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid Margin="20" RowSpacing="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60" />
+            <RowDefinition Height="60" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="60" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="60" />
+        </Grid.RowDefinitions>
+
+        <Picker Grid.Row="0" 
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                WidthRequest="280"
+                ItemsSource="{Binding EncryptionModes}"
+                SelectedItem="{Binding SelectedEncryptionModeText, Mode=TwoWay}" />
+
+        <HorizontalStackLayout Grid.Row="1" HorizontalOptions="Center" 
+                               VerticalOptions="Center">
+            <Label Margin="0,0,20,0"  
+                   HorizontalTextAlignment="Center" 
+                   VerticalTextAlignment="Center">Encryption Key:</Label>
+            <Entry WidthRequest="200" HeightRequest="50"
+                HorizontalTextAlignment="Center" 
+                   VerticalTextAlignment="Center" 
+                   Text="{Binding EncryptionKey}"></Entry>
+        </HorizontalStackLayout>
+
+        <ScrollView Grid.Row="2" VerticalOptions="Fill">
+            <Editor HorizontalTextAlignment="Start" 
+                    VerticalTextAlignment="Start"
+                    AutoSize="TextChanges"
+                    Text="{Binding EnteredText}"></Editor>
+        </ScrollView>
+
+        <HorizontalStackLayout Grid.Row="3" HorizontalOptions="Center"
+                               VerticalOptions="Center">
+            <Button Margin="0,0,20,0" WidthRequest="80" HeightRequest="50" 
+                    VerticalOptions="Center" HorizontalOptions="End"
+                    Command="{Binding EncryptCommand}"
+                    Text="Encrypt"></Button>
+            <Button Margin="20,0,0,0" WidthRequest="80" HeightRequest="50" 
+                    VerticalOptions="Center" HorizontalOptions="Start"
+                    Command="{Binding DecryptCommand}"
+                    Text="Decrypt"></Button>
+        </HorizontalStackLayout>
+
+        <ScrollView Grid.Row="4" VerticalOptions="Fill">
+            <Editor HorizontalTextAlignment="Start" 
+                    VerticalTextAlignment="Start"
+                    AutoSize="TextChanges"
+                    IsReadOnly="True"
+                    Text="{Binding ProcessedText}"></Editor>
+        </ScrollView>
+
+        <Button Grid.Row="5" WidthRequest="160" HeightRequest="50" 
+                VerticalOptions="Center" HorizontalOptions="Center"
+                Command="{Binding CopyToClipboardCommand}"
+                Text="Copy to Clipboard"></Button>
+
+    </Grid>
+
+</ContentPage>
