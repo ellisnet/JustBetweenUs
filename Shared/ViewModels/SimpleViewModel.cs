@@ -11,7 +11,7 @@
    limitations under the License.
 */
 
-//FILE DATE/REVISION: 02/17/2024
+//FILE DATE/REVISION: 08/31/2024
 
 // ReSharper disable RedundantCast
 // ReSharper disable RedundantAssignment
@@ -53,7 +53,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
-#if (WIN_UI || UNO) //Needs to be manually defined on Win UI (WIN_UI) or Uno (UNO) projects
+#if (WIN_UI || HAS_UNO) //WIN_UI needs to be manually defined on Win UI projects (and Uno net8.0-windows projects)
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -144,7 +144,7 @@ public class SimpleDialog : IDisposable
 
     public SimpleDialogButtons Buttons { get; set; }
 
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
     private SimpleDialog(
         Func<XamlRoot> xamlRootGetter,
         DispatcherQueue dispatcher,
@@ -254,7 +254,7 @@ public class SimpleDialog : IDisposable
 
         var result = SimpleDialogResult.None;
 
-#if (WIN_UI || UNO || MAUI)
+#if (WIN_UI || HAS_UNO || MAUI)
         string firstButton;
         SimpleDialogResult firstButtonResult;
         string secondButton = null;
@@ -283,7 +283,7 @@ public class SimpleDialog : IDisposable
         }
 #endif
 
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
         result = await _dispatcher.InvokeOnMainThreadAsync(async () =>
         {
             var dlgResult = SimpleDialogResult.None;
@@ -388,7 +388,7 @@ public class SimpleDialog : IDisposable
     public void Dispose()
     {
         _isDisposed = true;
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
         _xamlRootGetter = null;
         _dispatcher = null;
 #elif (MAUI)
@@ -399,7 +399,7 @@ public class SimpleDialog : IDisposable
     #endregion
 }
 
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
 internal static class DispatcherHelper
 {
     internal static void InvokeOnMainThread(this DispatcherQueue dispatcher, Action functionToExecute)
@@ -502,7 +502,7 @@ public interface IXamlRootGetter
 }
 #endif
 
-#if (WIN_UI || UNO || MAUI)
+#if (WIN_UI || HAS_UNO || MAUI)
 public abstract class SimpleViewModel : IXamlRootGetter, INotifyPropertyChanged, IDisposable
 #else
 public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
@@ -511,7 +511,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
     // ReSharper disable once InconsistentNaming
     private static bool? _isInDesignMode;
 
-#if (WIN_UI || UNO || MAUI)
+#if (WIN_UI || HAS_UNO || MAUI)
     //Don't currently know how to check and see if the view-model instance is in "design mode" -
     //  for WinUI and .NET MAUI.
     protected bool IsDesignMode(bool defaultValueIfNotSet) =>
@@ -536,7 +536,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 
     public static void SetIsDesignMode(bool isDesignMode) => _isInDesignMode = isDesignMode;
 
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
     private DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
 
     private Func<XamlRoot> _xamlRootGetter;
@@ -754,7 +754,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 
     #region | Dialog helpers |
 
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
     protected virtual SimpleDialog CreateDialog(
         string message,
         string title = null,
@@ -835,7 +835,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 
     #endregion
 
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
 
     protected Visibility GetVisibility(bool isVisible) {
         return isVisible ? Visibility.Visible : Visibility.Collapsed;
@@ -1099,11 +1099,11 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
         }
         PropertyChanged = null;
 
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
         _dispatcher = null;
 #endif
 
-#if (WIN_UI || UNO || MAUI)
+#if (WIN_UI || HAS_UNO || MAUI)
         _xamlRootGetter = null;
 #endif
     }
@@ -1140,7 +1140,7 @@ public class AffectsAllCommandsAttribute : Attribute;
 
 public class SimpleCommand : ICommand, IDisposable
 {
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
     private DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
 #endif
 
@@ -1334,7 +1334,7 @@ public class SimpleCommand : ICommand, IDisposable
                 case ExecuteStyle.SyncWithParam:
                     if (executeOnMain)
                     {
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
                         _dispatcher.TryEnqueue(() => { _executeWithParamSync.Invoke(parameter); });
 #elif MAUI
                         await MainThread.InvokeOnMainThreadAsync(() => { _executeWithParamSync.Invoke(parameter); });
@@ -1351,7 +1351,7 @@ public class SimpleCommand : ICommand, IDisposable
                 case ExecuteStyle.SyncNoParam:
                     if (executeOnMain)
                     {
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
                         _dispatcher.TryEnqueue(_executeNoParamSync.Invoke);
 #elif MAUI
                         await MainThread.InvokeOnMainThreadAsync(() => { _executeNoParamSync.Invoke(); });
@@ -1368,7 +1368,7 @@ public class SimpleCommand : ICommand, IDisposable
                 case ExecuteStyle.AsyncWithParam:
                     if (executeOnMain)
                     {
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
                         var tsc = new TaskCompletionSource();
                         var queued = _dispatcher.TryEnqueue(() => { WaitForExecute(tsc, _executeWithParamAsync, parameter); });
                         if (queued)
@@ -1390,7 +1390,7 @@ public class SimpleCommand : ICommand, IDisposable
                 case ExecuteStyle.AsyncNoParam:
                     if (executeOnMain)
                     {
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
                         var tsc = new TaskCompletionSource();
                         var queued = _dispatcher.TryEnqueue(() => { WaitForExecute(tsc, _executeNoParamAsync); });
                         if (queued)
@@ -1439,7 +1439,7 @@ public class SimpleCommand : ICommand, IDisposable
         _executeNoParamSync = null;
         _executeNoParamAsync = null;
 
-#if (WIN_UI || UNO)
+#if (WIN_UI || HAS_UNO)
         _dispatcher = null;
 #endif
     }

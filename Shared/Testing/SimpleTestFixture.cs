@@ -11,7 +11,7 @@
    limitations under the License.
 */
 
-//FILE DATE/REVISION: 03/02/2024b
+//FILE DATE/REVISION: 08/31/2024
 
 using Microsoft.Extensions.Configuration; //Required NuGet: Microsoft.Extensions.Hosting
 using Microsoft.Extensions.DependencyInjection; //Required NuGet: Microsoft.Extensions.DependencyInjection
@@ -443,7 +443,15 @@ public class SimpleTestOutputHelper : ITestOutputHelper
         }
         else
         {
-            _wrappedOutput.WriteLine(message);
+            try
+            {
+                //Writing to ITestOutputHelper can fail if the test has already completed
+                _wrappedOutput.WriteLine(message);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine(message);
+            }
         }
     }
 
@@ -457,7 +465,15 @@ public class SimpleTestOutputHelper : ITestOutputHelper
         }
         else
         {
-            _wrappedOutput.WriteLine(format, args);
+            try
+            {
+                //Writing to ITestOutputHelper can fail if the test has already completed
+                _wrappedOutput.WriteLine(format, args);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine(format, args);
+            }
         }
     }
 }
