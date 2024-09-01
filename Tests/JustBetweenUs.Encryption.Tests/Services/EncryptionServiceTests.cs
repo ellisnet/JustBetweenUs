@@ -22,6 +22,11 @@ public class EncryptionServiceTests : IClassFixture<EncryptionTestingFixture>
 
         fixture.CreateAndRegisterLogger<EncryptionService>(_output);
     }
+    
+    private string CleanLineEndings(string text) => 
+        (string.IsNullOrEmpty(text)) 
+            ? text 
+            : text.Replace("\r\n", "\n");
 
     [Fact]
     public void can_get_service() => GetService().Should().NotBeNull();
@@ -36,7 +41,7 @@ public class EncryptionServiceTests : IClassFixture<EncryptionTestingFixture>
 This is a test of Triple DES encryption.
 Triple DES is no longer considered to be secure by the NIST (as of 2017).
 https://en.wikipedia.org/wiki/Triple_DES#Security",
-"mf33rxktmey0Da0xJknlr5VdV+mVdUXZah3d3oU0v1cSJP8VQkoZ4F5k63+NBSYy4jggeENllWsSJP8VQkoZ4NK+X/UemJu5nSfEDBDmCnbInvYYIGSJKxQyH8SVl4NiAGZHJp7g7cPxDHbAcawCsqSvhy5FOjf073URu7x66ngr0fW5M4YcTs48CGA1qiir6UfTBOxxLKh21YeDARJPtL8iMAAkAeCDss6SaHiIwuST12/WgGuWvQ==")]
+"mf33rxktmexB05ccuAqIMMiYq9he3PJK+HjjASpml1nEjx3+5IqijX/fp12b8OimzqXUrlNtbc7z5u2yV8CXILv0wGnp16vaX8HgWV8UfeHWX3dPCsIOoG0ZJS5Xvh+jNLJj+zke9GQkvsZzK0vQst29k/KyTq7SH7Mw15KH8WnRUhPKOfYZqow3knuzSA0C5QGpOed6Y1+RvGNQf63vL+5JGELCpoIwG78o0Sh+Y0Qa8V6SIl2t/Q==")]
     public async Task OriginalTripleDES_EncryptToBase64_can_encrypt(
         string key, string toEncrypt, string expectedEncrypted)
     {
@@ -44,14 +49,14 @@ https://en.wikipedia.org/wiki/Triple_DES#Security",
         var crypt = GetService();
 
         //Act
-        var encrypted = await crypt.OriginalTripleDES_EncryptToBase64(key, toEncrypt);
+        var encrypted = await crypt.OriginalTripleDES_EncryptToBase64(key, CleanLineEndings(toEncrypt));
 
         //Assert
         encrypted.Should().Be(expectedEncrypted);
 
         //Let's make sure that we get the same text after decryption
         var decrypted = await crypt.OriginalTripleDES_DecryptFromBase64(key, encrypted);
-        decrypted.Should().Be(toEncrypt);
+        CleanLineEndings(decrypted).Should().Be(CleanLineEndings(toEncrypt));
 
         //Report
         _output.WriteLine($"Using the key: {key}");
@@ -75,7 +80,7 @@ https://en.wikipedia.org/wiki/Encryption#History")]
         var decrypted = await crypt.OriginalTripleDES_DecryptFromBase64(key, toDecrypt);
 
         //Assert
-        decrypted.Should().Be(expectedDecrypted);
+        CleanLineEndings(decrypted).Should().Be(CleanLineEndings(expectedDecrypted));
 
         //Let's make sure that we get the same encrypted text if we re-encrypt it
         var encrypted = await crypt.OriginalTripleDES_EncryptToBase64(key, decrypted);
@@ -133,7 +138,7 @@ https://en.wikipedia.org/wiki/Symmetric-key_algorithm")]
         var decrypted = await crypt.AES_DecryptFromBase64(key, toDecrypt);
 
         //Assert
-        decrypted.Should().Be(expectedDecrypted);
+        CleanLineEndings(decrypted).Should().Be(CleanLineEndings(expectedDecrypted));
 
         //Report
         _output.WriteLine($"Using the key: {key}");
@@ -181,7 +186,7 @@ https://en.wikipedia.org/wiki/Bruce_Schneier")]
         var decrypted = await crypt.Twofish_DecryptFromBase64(key, toDecrypt);
 
         //Assert
-        decrypted.Should().Be(expectedDecrypted);
+        CleanLineEndings(decrypted).Should().Be(CleanLineEndings(expectedDecrypted));
 
         //Report
         _output.WriteLine($"Using the key: {key}");
