@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
@@ -17,6 +18,7 @@ public class MainViewModel : SimpleViewModel, ICopyToClipboard
 {
     private IEncryptionService _encryptSvc;
     private bool _copyMessageShown;
+    private SimpleOsInfo _osInfo;
 
     public MainViewModel()
     {
@@ -220,6 +222,34 @@ public class MainViewModel : SimpleViewModel, ICopyToClipboard
 
     #endregion
 
+    #region ShowOsInfoCommand
+    
+    private SimpleCommand _showOsInfoCommand;
+    public SimpleCommand ShowOsInfoCommand =>
+        (_showOsInfoCommand ??= new SimpleCommand(CanShowOsInfo, DoShowOsInfo));
+    
+    private bool CanShowOsInfo() => true;
+
+    private async Task DoShowOsInfo()
+    {
+        if (CanShowOsInfo())
+        {
+            _osInfo ??= await SimpleOsInfo.GatherInfo(true); //TODO: Set this to false
+            var sb = new StringBuilder();
+            sb.AppendLine($"Currently running on: {_osInfo.PlatformOsName}");
+            sb.AppendLine($"Operating system description: {_osInfo.OsDescription}");
+            sb.AppendLine($"Operating system version: {_osInfo.OsVersion}");
+            sb.AppendLine($"Product name: {_osInfo.ProductName}");
+            sb.AppendLine($"Product name (for display): {_osInfo.ProductNameDisplay}");
+            sb.AppendLine($"Running as user: {_osInfo.RunningAsUser}{((_osInfo.IsAdminUser is true) ? " (local admin)" : "")}");
+            sb.AppendLine($"DotNet version: {_osInfo.DotNetVersion}");
+            sb.AppendLine($"Platform architecture: {_osInfo.PlatformArchitecture}");
+            await ShowInfo(sb.ToString());
+        }
+    }
+    
+    #endregion
+    
     #endregion
 
     #region | ICopyToClipboard implementation |

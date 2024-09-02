@@ -16,16 +16,20 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="60" />
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="40" />
+        </Grid.ColumnDefinitions>
 
-        <Picker Grid.Row="0" 
+        <Picker Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                 HorizontalOptions="Center"
                 VerticalOptions="Center"
                 WidthRequest="280"
                 ItemsSource="{Binding EncryptionModes}"
                 SelectedItem="{Binding SelectedEncryptionModeText, Mode=TwoWay}" />
 
-        <HorizontalStackLayout Grid.Row="1" HorizontalOptions="Center" 
-                               VerticalOptions="Center">
+        <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                               HorizontalOptions="Center" VerticalOptions="Center">
             <Label Margin="0,0,20,0"  
                    HorizontalTextAlignment="Center" 
                    VerticalTextAlignment="Center">Encryption Key:</Label>
@@ -35,14 +39,14 @@
                    Text="{Binding EncryptionKey}"></Entry>
         </HorizontalStackLayout>
 
-        <ScrollView Grid.Row="2" VerticalOptions="Fill">
+        <ScrollView Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalOptions="Fill">
             <Editor HorizontalTextAlignment="Start" 
                     VerticalTextAlignment="Start"
                     AutoSize="TextChanges"
                     Text="{Binding EnteredText}"></Editor>
         </ScrollView>
 
-        <HorizontalStackLayout Grid.Row="3" HorizontalOptions="Center"
+        <HorizontalStackLayout Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalOptions="Center"
                                VerticalOptions="Center">
             <Button Margin="0,0,20,0" WidthRequest="80" HeightRequest="50" 
                     VerticalOptions="Center" HorizontalOptions="End"
@@ -54,7 +58,7 @@
                     Text="Decrypt"></Button>
         </HorizontalStackLayout>
 
-        <ScrollView Grid.Row="4" VerticalOptions="Fill">
+        <ScrollView Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" VerticalOptions="Fill">
             <Editor HorizontalTextAlignment="Start" 
                     VerticalTextAlignment="Start"
                     AutoSize="TextChanges"
@@ -62,10 +66,15 @@
                     Text="{Binding ProcessedText}"></Editor>
         </ScrollView>
 
-        <Button Grid.Row="5" WidthRequest="160" HeightRequest="50" 
+        <Button Grid.Row="5" Grid.Column="0" WidthRequest="160" HeightRequest="50" 
                 VerticalOptions="Center" HorizontalOptions="Center"
                 Command="{Binding CopyToClipboardCommand}"
                 Text="Copy to Clipboard"></Button>
+        
+        <Button Grid.Row="5" Grid.Column="1" WidthRequest="30" HeightRequest="30"
+                VerticalOptions="Center" HorizontalOptions="Center"
+                Command="{Binding ShowOsInfoCommand}"
+                Text="i"></Button>
 
     </Grid>
 
