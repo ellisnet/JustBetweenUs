@@ -3496,15 +3496,16 @@ public class SimpleOsInfo
     {
         return DeviceInfo.Current.Platform.ToString();
     }
-#else
-    
+#elif (WIN_UI || HAS_UNO)
     private string GetGenericOsInfo()
     {
         var info = Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily.ToString();
         return info;
     }
+#else
+    private string GetGenericOsInfo() => string.Empty;
 #endif
-    
+
     public bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
     public bool IsMacOs => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
     public bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
@@ -3638,13 +3639,15 @@ public class SimpleOsInfo
             {
                 result = IdentifiedLinuxDistro.Debian;
             }
-            else if (distro.StartsWith(MintDistroIdentifier))
-            {
-                result = IdentifiedLinuxDistro.Mint;
-            }
-            else if (distro.StartsWith(LmdeDistroIdentifier))
+            else if (distro.StartsWith(LmdeDistroIdentifier)
+                     || distro.StartsWith($"linux {MintDistroIdentifier} {DebianDistroIdentifier}"))
             {
                 result = IdentifiedLinuxDistro.LMDE;
+            }
+            else if (distro.StartsWith(MintDistroIdentifier)
+                     || distro.StartsWith($"linux {MintDistroIdentifier}"))
+            {
+                result = IdentifiedLinuxDistro.Mint;
             }
             else if (distro.StartsWith(UbuntuDistroIdentifier))
             {

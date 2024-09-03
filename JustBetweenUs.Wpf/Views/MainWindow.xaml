@@ -19,8 +19,12 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="60" />
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="60" />
+        </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" 
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                     Orientation="Horizontal" 
                     HorizontalAlignment="Center" 
                     VerticalAlignment="Center">
@@ -35,10 +39,11 @@
                      Text="{Binding EncryptionKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
         </StackPanel>
 
-        <TextBox Grid.Row="1" TextWrapping="Wrap" AcceptsReturn="True" Margin="5" IsReadOnly="False"
+        <TextBox Grid.Row="1"  Grid.Column="0" Grid.ColumnSpan="2"
+                 TextWrapping="Wrap" AcceptsReturn="True" Margin="5" IsReadOnly="False"
                  Text="{Binding EnteredText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
 
-        <StackPanel Grid.Row="2" 
+        <StackPanel Grid.Row="2"  Grid.Column="0" Grid.ColumnSpan="2"
                     Orientation="Horizontal" 
                     HorizontalAlignment="Center" 
                     VerticalAlignment="Center">
@@ -50,11 +55,19 @@
                     Command="{Binding DecryptCommand}">Decrypt</Button>
         </StackPanel>
 
-        <TextBox Grid.Row="3" TextWrapping="Wrap" AcceptsReturn="True" Margin="5" IsReadOnly="True"
+        <TextBox Grid.Row="3"  Grid.Column="0" Grid.ColumnSpan="2"
+                 TextWrapping="Wrap" AcceptsReturn="True" Margin="5" IsReadOnly="True"
                  Text="{Binding ProcessedText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
 
-        <Button Grid.Row="4" Width="160" Height="30" 
+        <Button Grid.Row="4"  Grid.Column="0"
+                Width="160" Height="30" 
                 VerticalAlignment="Center" HorizontalAlignment="Center"
                 Command="{Binding CopyToClipboardCommand}">Copy to Clipboard</Button>
+
+        <Button Grid.Row="4" Grid.Column="1"
+                Width="30" Height="30"
+                VerticalAlignment="Center" HorizontalAlignment="Center"
+                Command="{Binding ShowOsInfoCommand}">i</Button>
+
     </Grid>
 </Window>
