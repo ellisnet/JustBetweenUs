@@ -1,13 +1,11 @@
+using System;
 using JustBetweenUs.Encryption;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using System;
 using Uno.Resizetizer;
 using Uno.UI;
-
-// ReSharper disable RedundantExtendsListEntry
 
 namespace JustBetweenUs.Uno;
 
@@ -37,7 +35,6 @@ public partial class App : Application
 #if DEBUG
         MainWindow.EnableHotReload();
 #endif
-
 
         // Do not repeat app initialization when the Window already has content,
         // just ensure that the window is active

@@ -22,5 +22,4 @@ namespace JustBetweenUs.Mobile.WinUI
 
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
     }
-
 }

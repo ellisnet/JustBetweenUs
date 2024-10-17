@@ -1,0 +1,72 @@
+<Project Sdk="Uno.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst;net8.0-desktop</TargetFrameworks>
+
+    <OutputType>Exe</OutputType>
+    <UnoSingleProject>true</UnoSingleProject>
+
+    <!-- Display name -->
+    <ApplicationTitle>JustBetweenUs.Uno</ApplicationTitle>
+    <!-- App Identifier -->
+    <ApplicationId>com.companyname.JustBetweenUs.Uno</ApplicationId>
+    <!-- Versions -->
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+    <!-- Package Publisher -->
+    <ApplicationPublisher>HP</ApplicationPublisher>
+    <!-- Package Description -->
+    <Description>JustBetweenUs.Uno powered by Uno Platform.</Description>
+
+    <!--
+      UnoFeatures lets you quickly add and manage implicit package references based on the features you want to use.
+      https://aka.platform.uno/singleproject-features
+    -->
+    <UnoFeatures>
+      Lottie;
+      Toolkit;
+    </UnoFeatures>
+
+    <!--Hateful Uno way of specifying specific NuGet package versions - see: https://platform.uno/docs/articles/features/using-the-uno-sdk.html?tabs=3rd-party-packages#implicit-packages -->
+    <!--Microsoft.Extensions.Logging.Console - package version-->
+    <MicrosoftLoggingVersion>8.0.1</MicrosoftLoggingVersion>
+      
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-desktop|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-ios|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-maccatalyst|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-desktop|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-ios|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-maccatalyst|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Shared\ViewModels\EncryptionMode.cs" Link="ViewModels\EncryptionMode.cs" />
+    <Compile Include="..\..\Shared\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
+    <Compile Include="..\..\Shared\ViewModels\SimpleViewModel.cs" Link="ViewModels\SimpleViewModel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\JustBetweenUs.Encryption\JustBetweenUs.Encryption.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ViewModels\" />
+  </ItemGroup>
+
+</Project>

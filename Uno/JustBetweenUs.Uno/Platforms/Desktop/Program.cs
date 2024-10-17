@@ -1,8 +1,6 @@
 using System;
 using Uno.UI.Runtime.Skia;
 
-// ReSharper disable CheckNamespace
-
 namespace JustBetweenUs.Uno;
 
 public class Program

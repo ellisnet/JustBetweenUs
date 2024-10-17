@@ -1,9 +1,14 @@
-﻿<Page x:Class="JustBetweenUs.Uno.Views.MainPage"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:vm="using:JustBetweenUs.ViewModels"
-      xmlns:local="using:JustBetweenUs.Uno.Views"
-      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="JustBetweenUs.WinUi.Views.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:JustBetweenUs.WinUi.Views"
+    xmlns:vm="using:JustBetweenUs.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.DataContext>
         <vm:MainViewModel />
@@ -64,7 +69,7 @@
         <Button Grid.Row="4" Grid.Column="0" Width="200" Height="30" 
             VerticalAlignment="Center" HorizontalAlignment="Center"
             Command="{Binding CopyToClipboardCommand}">Copy to Clipboard</Button>
-        
+
         <Button Grid.Row="4" Grid.Column="1" Width="30" Height="30"
                 VerticalAlignment="Center" HorizontalAlignment="Center"
                 Command="{Binding ShowOsInfoCommand}">i</Button>

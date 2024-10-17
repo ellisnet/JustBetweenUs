@@ -8,15 +8,6 @@
     }
   },
   "profiles": {
-    // Note: In order to select this profile, you'll need to comment the `Packaged` profile below until this is fixed: https://aka.platform.uno/wasdk-maui-debug-profile-issue
-    "JustBetweenUs.Uno (WinAppSDK Unpackaged)": {
-      "commandName": "Project",
-      "compatibleTargetFramework": "windows"
-    },
-    "JustBetweenUs.Uno (WinAppSDK Packaged)": {
-      "commandName": "MsixPackage",
-      "compatibleTargetFramework": "windows"
-    },
     "JustBetweenUs.Uno (Desktop)": {
       "commandName": "Project",
       "compatibleTargetFramework": "desktop"

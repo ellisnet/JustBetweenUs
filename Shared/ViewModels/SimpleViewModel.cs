@@ -11,7 +11,7 @@
    limitations under the License.
 */
 
-//FILE DATE/REVISION: 09/02/2024-wip
+//FILE DATE/REVISION: 10/16/2024
 
 // ReSharper disable RedundantCast
 // ReSharper disable RedundantAssignment
@@ -1520,6 +1520,8 @@ public class SimpleEnumAttribute<TInfo> : Attribute, ISimpleEnumInfoAttribute
 
 public static class SimpleEnumHelper
 {
+    // ReSharper disable InconsistentNaming
+
     private static readonly object Locker = new();
 
     //Item1 = the Enum type
@@ -1527,6 +1529,8 @@ public static class SimpleEnumHelper
 
     //Item1 = the SimpleEnumInfo type
     private static readonly Dictionary<Type, Dictionary<string, object>> InfoDictionary = new();
+
+    // ReSharper restore InconsistentNaming
 
     private static bool CheckDictionaries(Type enumType = null, Type infoType = null)
     {
@@ -2846,6 +2850,7 @@ public enum IdentifiedLinuxDistro
     Mint,
     // ReSharper disable once InconsistentNaming
     LMDE,
+    Android,
     NotLinux = 999,
 }
 
@@ -2987,7 +2992,46 @@ public class SimpleOsInfo
             (23, "Sonoma"),
             (24, "Sequoia"),
         ];
-    
+
+    private static Dictionary<int, (Version Version, string Codename)> AndroidCodenames { get; } = new()
+    {
+        { 1, new ValueTuple<Version, string>(new Version(1, 0), "Initial") },
+        { 2, new ValueTuple<Version, string>(new Version(1, 1), "Petit Four") },
+        { 3, new ValueTuple<Version, string>(new Version(1, 5), "Cupcake") },
+        { 4, new ValueTuple<Version, string>(new Version(1, 6), "Donut") },
+        { 5, new ValueTuple<Version, string>(new Version(2, 0), "Eclair") },
+        { 6, new ValueTuple<Version, string>(new Version(2,0,1), "Eclair") },
+        { 7, new ValueTuple<Version, string>(new Version(2, 1), "Eclair") },
+        { 8, new ValueTuple<Version, string>(new Version(2, 2), "Froyo") },
+        { 9, new ValueTuple<Version, string>(new Version(2, 3), "Gingerbread") },
+        { 10, new ValueTuple<Version, string>(new Version(2, 3, 3), "Gingerbread") },
+        { 11, new ValueTuple<Version, string>(new Version(3, 0), "Honeycomb") },
+        { 12, new ValueTuple<Version, string>(new Version(3, 1), "Honeycomb") },
+        { 13, new ValueTuple<Version, string>(new Version(3, 2), "Honeycomb") },
+        { 14, new ValueTuple<Version, string>(new Version(4, 0), "Ice Cream Sandwich") },
+        { 15, new ValueTuple<Version, string>(new Version(4, 0, 3), "Ice Cream Sandwich") },
+        { 16, new ValueTuple<Version, string>(new Version(4, 1), "Jelly Bean") },
+        { 17, new ValueTuple<Version, string>(new Version(4, 2), "Jelly Bean") },
+        { 18, new ValueTuple<Version, string>(new Version(4, 3), "Jelly Bean") },
+        { 19, new ValueTuple<Version, string>(new Version(4, 4), "KitKat") },
+        { 20, new ValueTuple<Version, string>(new Version(4, 5), "KitKat") },
+        { 21, new ValueTuple<Version, string>(new Version(5, 0), "Lollipop") },
+        { 22, new ValueTuple<Version, string>(new Version(5, 1), "Lollipop") },
+        { 23, new ValueTuple<Version, string>(new Version(6, 0), "Marshmallow") },
+        { 24, new ValueTuple<Version, string>(new Version(7, 0), "Nougat") },
+        { 25, new ValueTuple<Version, string>(new Version(7, 1), "Nougat") },
+        { 26, new ValueTuple<Version, string>(new Version(8, 0), "Oreo") },
+        { 27, new ValueTuple<Version, string>(new Version(8, 1), "Oreo") },
+        { 28, new ValueTuple<Version, string>(new Version(9, 0), "Pie") },
+        { 29, new ValueTuple<Version, string>(new Version(10, 0), "Quince Tart") },
+        { 30, new ValueTuple<Version, string>(new Version(11, 0), "Red Velvet Cake") },
+        { 31, new ValueTuple<Version, string>(new Version(12, 0), "Snow Cone") },
+        { 32, new ValueTuple<Version, string>(new Version(12, 1), "Snow Cone V2") },
+        { 33, new ValueTuple<Version, string>(new Version(13, 0), "Tiramisu") },
+        { 34, new ValueTuple<Version, string>(new Version(14, 0), "Upside Down Cake") },
+        { 35, new ValueTuple<Version, string>(new Version(15, 0), "Vanilla Ice Cream") },
+    };
+
     private const string UnixRootUsername = "root";
     private const string DebianDistroIdentifier = "debian";
     private const string LmdeDistroIdentifier = "lmde";
@@ -3491,24 +3535,142 @@ public class SimpleOsInfo
         }
     }
 
+    private OsVersionInfo GetAndroidVersionInfo()
+    {
+        var result = new OsVersionInfo
+        {
+            VersionNumber = null,
+            MajorVersion = 0,
+            MinorVersion = null,
+            BuildVersion = null,
+            RevisionVersion = null,
+            IsLongTermSupported = null,
+            VersionCodename = null,
+            BasedOnVersion = null,
+            ProductName = null,
+            ProductNameDisplay = null
+        };
+
+#if (MAUI || HAS_UNO)
+        var version = string.Empty;
+        var major = 0;
+        var minor = 0;
+        var build = 0;
+        var model = string.Empty;
+        var manufacturer = string.Empty;
+
 #if MAUI
-    private string GetGenericOsInfo()
-    {
-        return DeviceInfo.Current.Platform.ToString();
-    }
-#elif (WIN_UI || HAS_UNO)
-    private string GetGenericOsInfo()
-    {
-        var info = Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily.ToString();
-        return info;
-    }
-#else
-    private string GetGenericOsInfo() => string.Empty;
+        var info = DeviceInfo.Current.Version;
+
+        if (info.Major > 0)
+        {
+            result.MajorVersion = major = info.Major;
+            version += $"{major}";
+
+            if (info.Minor > -1)
+            {
+                result.MinorVersion = minor = info.Minor;
+                version += $".{minor}";
+
+                if (info.Build > -1)
+                {
+                    result.BuildVersion = build = info.Build;
+                    version += $".{build}";
+
+                    if (info.Revision > -1)
+                    {
+                        result.RevisionVersion = info.Revision;
+                        version += $".{info.Revision}";
+                    }
+                }
+            }
+        }
+        model = DeviceInfo.Current.Model?.Trim() ?? string.Empty;
+        manufacturer = DeviceInfo.Current.Manufacturer?.Trim() ?? string.Empty;
+
+#elif HAS_UNO
+        try
+        {
+            var encoded = Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamilyVersion;
+            var v = ulong.Parse(encoded);
+            major = (int)(ushort)((v & 0xFFFF000000000000L) >> 48);
+            minor = (int)(ushort)((v & 0x0000FFFF00000000L) >> 32);
+            build = (int)(ushort)((v & 0x00000000FFFF0000L) >> 16);
+            var revision = (int)(ushort)((v & 0x000000000000FFFFL));
+
+            if (major > 0)
+            {
+                result.MajorVersion = major;
+                result.MinorVersion = minor;
+                version += $"{major}.{minor}";
+
+                if (build > 0 || revision > 0)
+                {
+                    result.BuildVersion = build;
+                    version += $".{build}";
+
+                    if (revision > 0)
+                    {
+                        result.RevisionVersion = revision;
+                        version += $".{revision}";
+                    }
+                }
+            }
+        }
+        catch (Exception)
+        {
+            //Version info could not be decoded
+        }
 #endif
+
+        if (major > 0)
+        {
+            foreach (var kvp in AndroidCodenames.OrderByDescending(o => o.Key))
+            {
+                if (major >= kvp.Value.Version.Major
+                    && minor >= kvp.Value.Version.Minor
+                    && build >= kvp.Value.Version.Build)
+                {
+                    result.VersionCodename = kvp.Value.Codename;
+                    result.ProductName = $"Android {version} ({kvp.Value.Codename}) API level {kvp.Key}";
+                    break;
+                }
+            }
+
+            result.VersionNumber = version;
+            if (string.IsNullOrWhiteSpace(result.ProductName))
+            {
+                result.ProductName = $"Android {version}";
+            }
+
+            if (string.IsNullOrWhiteSpace(model))
+            {
+                result.ProductNameDisplay = result.ProductName;
+            }
+            else
+            {
+                result.ProductNameDisplay = $"{result.ProductName} - {model}"
+                                            + $"{(string.IsNullOrWhiteSpace(manufacturer) ? string.Empty : $" ({manufacturer})")}";
+            }
+        }
+
+#endif
+
+        return result;
+    }
 
     public bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
     public bool IsMacOs => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
     public bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+#if MAUI
+    public bool IsAndroid => DeviceInfo.Current.Platform == DevicePlatform.Android;
+#elif (WIN_UI || HAS_UNO)
+    public bool IsAndroid => (Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily?.Trim() ?? string.Empty)
+        .StartsWith("Android.", StringComparison.InvariantCultureIgnoreCase);
+#else
+    public bool IsAndroid => false;
+#endif
 
     public bool IsX64 => RuntimeInformation.OSArchitecture == Architecture.X64;
     public bool IsArm64 => RuntimeInformation.OSArchitecture == Architecture.Arm64;
@@ -3547,9 +3709,11 @@ public class SimpleOsInfo
         ? "Microsoft Windows"
         : (IsMacOs)
             ? "Apple macOS"
-            : (IsLinux)
-                ? $"Linux ({((LinuxDistro == IdentifiedLinuxDistro.Unknown) ? "unidentified distro" :  LinuxDistro.ToString())})"
-                : "Unknown";
+            : (IsAndroid)
+                ? "Android"
+                : (IsLinux)
+                    ? $"Linux ({((LinuxDistro == IdentifiedLinuxDistro.Unknown) ? "unidentified distro" :  LinuxDistro.ToString())})"
+                    : "Unknown";
 
     public string DotNetVersion => RuntimeEnvironment.GetSystemVersion();
 
@@ -3568,6 +3732,13 @@ public class SimpleOsInfo
             LinuxDistro = IdentifiedLinuxDistro.NotLinux;
             OsVersionInfo = await GetWindowsVersionInfo(withConsoleOutput);
             await GetWindowsUserInfo(withConsoleOutput);
+        }
+        else if (IsAndroid)
+        {
+            LinuxDistro = IdentifiedLinuxDistro.Android;
+            OsVersionInfo = GetAndroidVersionInfo();
+            RunningAsUser = "mobile";
+            IsAdminUser = false;
         }
         else if (IsLinux)
         {
@@ -3705,7 +3876,7 @@ public class SimpleOsInfo
                             CreateNoWindow = true,
                         }
                     };
-                    process.Start();
+                    process.Start();  //TODO: Can't use this line on iOS; will have to find an alternative, or just make code unavailable
 
                     var output = await process.StandardOutput.ReadToEndAsync();
                     var error = await process.StandardError.ReadToEndAsync();

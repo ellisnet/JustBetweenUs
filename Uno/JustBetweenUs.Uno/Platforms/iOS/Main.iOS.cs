@@ -1,9 +1,6 @@
 using UIKit;
 
-// ReSharper disable CheckNamespace
-
-namespace JustBetweenUs.Uno.MacCatalyst;
-
+namespace JustBetweenUs.Uno.iOS;
 public class EntryPoint
 {
     // This is the main entry point of the application.
