@@ -234,7 +234,7 @@ public class MainViewModel : SimpleViewModel, ICopyToClipboard
     {
         if (CanShowOsInfo())
         {
-            _osInfo ??= await SimpleOsInfo.GatherInfo(true); //TODO: Set this to false
+            _osInfo ??= await SimpleOsInfo.GatherInfo(withConsoleOutput: false);
             var sb = new StringBuilder();
             sb.AppendLine($"Currently running on: {_osInfo.PlatformOsName}");
             sb.AppendLine($"Operating system description: {_osInfo.OsDescription}");
