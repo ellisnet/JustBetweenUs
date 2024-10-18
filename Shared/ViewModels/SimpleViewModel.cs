@@ -3035,7 +3035,7 @@ public class SimpleOsInfo
     private const string UnixRootUsername = "root";
     private const string DebianDistroIdentifier = "debian";
     private const string LmdeDistroIdentifier = "lmde";
-    private const string MintDistroIdentifier = "mint"; //TODO: Not sure this is correct
+    private const string MintDistroIdentifier = "mint";
     private const string UbuntuDistroIdentifier = "ubuntu";
     private const string AlpineDistroIdentifier = "alpine linux";
 
