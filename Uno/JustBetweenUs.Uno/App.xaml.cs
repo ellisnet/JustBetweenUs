@@ -5,7 +5,10 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using Uno.Resizetizer;
+
+#if (DEBUG && DEBUGGING_ON_WINDOWS)
 using Uno.UI;
+#endif 
 
 namespace JustBetweenUs.Uno;
 
@@ -32,8 +35,9 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         MainWindow = new Window();
-#if DEBUG
-        MainWindow.EnableHotReload();
+#if (DEBUG && DEBUGGING_ON_WINDOWS)
+        //The following line causes problems when trying to build the project on Linux - at least with .NET SDK version 8.0.405
+        MainWindow.UseStudio(showHotReloadIndicator: true);
 #endif
 
         // Do not repeat app initialization when the Window already has content,

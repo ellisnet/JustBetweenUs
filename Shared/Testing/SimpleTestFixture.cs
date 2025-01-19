@@ -1,5 +1,5 @@
 ﻿/*
-   Copyright 2024 Ellisnet - Jeremy Ellis (jeremy@ellisnet.com)
+   Copyright 2025 Ellisnet - Jeremy Ellis (jeremy@ellisnet.com)
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -11,7 +11,7 @@
    limitations under the License.
 */
 
-//FILE DATE/REVISION: 08/31/2024
+//FILE DATE/REVISION: 2025-01-18
 
 using Microsoft.Extensions.Configuration; //Required NuGet: Microsoft.Extensions.Hosting
 using Microsoft.Extensions.DependencyInjection; //Required NuGet: Microsoft.Extensions.DependencyInjection
@@ -25,14 +25,20 @@ using System.Linq;
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedMemberInSuper.Global
 
+#pragma warning disable IDE0079
+#pragma warning disable CA1050
+#pragma warning disable CA1513
+#pragma warning disable CA1859
+#pragma warning disable IDE0290
+
 #if SIMPLE_HTTP_FACTORY
-using System.Net.Http; //Required NuGet: Microsoft.Extensions.Http
+using System.Net.Http; //Required NuGet: Microsoft.Extensions.Http - IMPORTANT: We don't need the System.Net.Http NuGet package
 #endif
 
 #if SIMPLE_OUTPUT_LOGGING
 using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
-using Xunit.Abstractions;
+using Xunit.Abstractions; //Required NuGet: xunit
 #endif
 
 // ReSharper disable CheckNamespace
@@ -99,7 +105,7 @@ public class SimpleTestFixture : IServiceProvider, ITestFixture
     protected static string DefaultEnvironmentName => nameof(Environments.Development);
 
 #if SIMPLE_OUTPUT_LOGGING
-    private Dictionary<string, ILogger> _registeredLoggers = new();
+    private Dictionary<string, ILogger> _registeredLoggers = [];
     private readonly object _loggerLocker = new();
     private IOutputLoggerFactory _loggerFactory = new SimpleOutputLoggerFactory();
 #endif
@@ -152,7 +158,7 @@ public class SimpleTestFixture : IServiceProvider, ITestFixture
         var services = new ServiceCollection();
         services.AddSingleton(config);
 #if SIMPLE_HTTP_FACTORY
-        services.AddSingleton<IHttpClientFactory, SimpleHttpClientFactory>();
+        services.AddSingleton<IHttpClientFactory, SimpleTestingHttpClientFactory>();
 #endif
 
         RegisterCustomServices(services,
@@ -259,16 +265,9 @@ public class SimpleTestFixture : IServiceProvider, ITestFixture
         }
 #endif
 
-        // ReSharper disable once UseNegatedPatternMatching
-        var result = ServiceProvider.GetService(serviceType);
-
-        if (result == null)
-        {
-            throw new InvalidOperationException("Unable to find a registered instance of type "
-                                                + $"'{serviceType.Name}' - maybe it wasn't registered.");
-        }
-
-        return result;
+        return ServiceProvider.GetService(serviceType)
+            ?? throw new InvalidOperationException("Unable to find a registered instance of type "
+                + $"'{serviceType.Name}' - maybe it wasn't registered.");
     }
 
     #endregion
@@ -282,16 +281,9 @@ public class SimpleTestFixture : IServiceProvider, ITestFixture
         CheckIsDisposed();
         var serviceType = typeof(TService);
 
-        // ReSharper disable once UseNegatedPatternMatching
-        var result = GetService(serviceType) as TService;
-
-        if (result == null)
-        {
-            throw new InvalidOperationException("Unable to find a registered instance of type "
+        return GetService(serviceType) as TService
+            ?? throw new InvalidOperationException("Unable to find a registered instance of type "
                 + $"'{serviceType.Name}' - maybe it wasn't registered.");
-        }
-
-        return result;
     }
 
     public IEnumerable<TService> GetServices<TService>() where TService : class
@@ -304,7 +296,7 @@ public class SimpleTestFixture : IServiceProvider, ITestFixture
     public void CreateAndRegisterLogger<T>(ITestOutputHelper output,
         bool registerBasicILogger = true)
     {
-        if (output == null) { throw new ArgumentNullException(nameof(output));}
+        ArgumentNullException.ThrowIfNull(output, nameof(output));
 
         if (typeof(T).IsGenericType)
         {
@@ -343,16 +335,24 @@ public class SimpleTestFixture : IServiceProvider, ITestFixture
 
     #region | IDisposable implementation |
 
-    public virtual void Dispose()
+    public void Dispose()
     {
-        if (!_isDisposed)
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing && (!_isDisposed))
         {
             _isDisposed = true;
             ServiceProvider = null;
             Context = null;
 #if SIMPLE_OUTPUT_LOGGING
+            // ReSharper disable InconsistentlySynchronizedField
             _registeredLoggers.Clear();
             _registeredLoggers = null;
+            // ReSharper restore InconsistentlySynchronizedField
             _loggerFactory = null;
 #endif
         }
@@ -379,7 +379,7 @@ public class SimpleTestingContext : ITestingContext
 
 #if SIMPLE_HTTP_FACTORY
 
-public class SimpleHttpClientFactory : IHttpClientFactory
+public class SimpleTestingHttpClientFactory : IHttpClientFactory
 {
     public HttpClient CreateClient(string name) => new();
 }
@@ -485,7 +485,17 @@ public class SimpleOutputLoggerScope<TState> : IDisposable
     private readonly TState _state;
 #pragma warning restore IDE0052
     public SimpleOutputLoggerScope(TState state) { _state = state; }
-    public void Dispose() { }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing) { } //Nothing to dispose yet
+    }
 }
 
 internal class SimpleOutputLogWriter
@@ -533,7 +543,7 @@ public class SimpleOutputLogger : ILogger
 
     public SimpleOutputLogger(ITestOutputHelper output, string name = null)
     {
-        if (output == null) { throw new ArgumentNullException(nameof(output)); }
+        ArgumentNullException.ThrowIfNull(output, nameof(output));
         _writer = SimpleOutputLogWriter.GetInstance(output);
         _name = (string.IsNullOrWhiteSpace(name)) ? null : name.Trim();
     }

@@ -1,5 +1,5 @@
 ﻿/*
-   Copyright 2024 Ellisnet - Jeremy Ellis (jeremy@ellisnet.com)
+   Copyright 2025 Ellisnet - Jeremy Ellis (jeremy@ellisnet.com)
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -11,7 +11,10 @@
    limitations under the License.
 */
 
+//FILE DATE/REVISION: 2025-01-18
+
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -19,6 +22,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
+// ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedMember.Global
 // ReSharper disable CheckNamespace
 
@@ -57,7 +61,87 @@ public enum LineEndingFixType
 
 public static class EmbeddedResourceHelper
 {
-    public static async Task<string> GetResourceAsString(string embeddedResourcePath,
+    public static IList<string> FindResourceFileNames(
+        string rootNamespace,
+        string folderPath = null,
+        string nameStartsWith = null,
+        string extension = null,
+        Assembly assembly = null)
+    {
+        assembly ??= Assembly.GetExecutingAssembly();
+
+        IList<string> result = Array.Empty<string>();
+
+        if (!string.IsNullOrWhiteSpace(rootNamespace))
+        {
+            var beginsWith = rootNamespace.Trim();
+
+            if (!string.IsNullOrWhiteSpace(folderPath))
+            {
+                beginsWith += "." + folderPath
+                    .Replace("/", ".")
+                    .Replace("\\", ".")
+                    .Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(nameStartsWith))
+            {
+                beginsWith += ((beginsWith.EndsWith('.'))
+                                  ? string.Empty
+                                  : ".")
+                              + nameStartsWith.Trim();
+            }
+
+            extension = (string.IsNullOrWhiteSpace(extension))
+                ? null
+                : extension.Trim().ToLowerInvariant();
+
+            if (extension != null && (!extension.StartsWith('.')))
+            {
+                extension = $".{extension}";
+            }
+
+            var found = new List<string>();
+            foreach (var file in assembly.GetManifestResourceNames())
+            {
+                if (file.StartsWith(beginsWith)
+                    && (extension == null || file.ToLowerInvariant().EndsWith(extension)))
+                {
+                    found.Add(file);
+                }
+            }
+
+            if (found.Count > 0) { result = found; }
+        }
+
+        return result;
+    }
+
+    public static async Task<string> GetResourceAsString(string exactResourceName,
+        Assembly assembly = null,
+        LineEndingFixType fixType = LineEndingFixType.NoChange,
+        bool trimResult = true)
+    {
+        if (string.IsNullOrWhiteSpace(exactResourceName))
+        {
+            throw new ArgumentException("Value cannot be null or blank.", nameof(exactResourceName));
+        }
+
+        assembly ??= Assembly.GetExecutingAssembly();
+
+        await using var stream = assembly.GetManifestResourceStream(exactResourceName.Trim());
+        if (stream == null)
+        {
+            throw new ArgumentException($"The embedded resource '{exactResourceName}' does not appear to exist.",
+                nameof(exactResourceName));
+        }
+        using var reader = new StreamReader(stream);
+        var text = FixLineEndings((await reader.ReadToEndAsync()), fixType);
+
+        return (trimResult) ? text?.Trim() : text;
+    }
+
+    public static Task<string> GetResourceAsString(string embeddedResourcePath,
         string rootNamespace,
         Assembly assembly = null,
         LineEndingFixType fixType = LineEndingFixType.NoChange,
@@ -76,18 +160,55 @@ public static class EmbeddedResourceHelper
                        .Replace("\\", ".")
                        .Trim();
 
-        assembly ??= Assembly.GetExecutingAssembly();
-        await using var stream = assembly.GetManifestResourceStream(path);
+        return GetResourceAsString(path, assembly, fixType, trimResult);
+    }
 
+    public static async Task<byte[]> GetResourceAsBytes(string exactResourceName,
+        Assembly assembly = null)
+    {
+        if (string.IsNullOrWhiteSpace(exactResourceName))
+        {
+            throw new ArgumentException("Value cannot be null or blank.", nameof(exactResourceName));
+        }
+
+        byte[] result;
+        assembly ??= Assembly.GetExecutingAssembly();
+
+        await using var stream = assembly.GetManifestResourceStream(exactResourceName.Trim());
         if (stream == null)
         {
-            throw new ArgumentException($"The embedded resource '{path}' does not appear to exist.",
-                nameof(embeddedResourcePath));
+            throw new ArgumentException($"The embedded resource '{exactResourceName}' does not appear to exist.",
+                nameof(exactResourceName));
         }
-        using var reader = new StreamReader(stream);
-        var text = FixLineEndings((await reader.ReadToEndAsync()), fixType);
 
-        return (trimResult) ? text?.Trim() : text;
+        // ReSharper disable once ConvertToUsingDeclaration
+        using (var br = new BinaryReader(stream))
+        {
+            result = br.ReadBytes((int)stream.Length);
+        }
+
+        return result;
+
+    }
+
+    public static Task<byte[]> GetResourceAsBytes(string embeddedResourcePath,
+        string rootNamespace,
+        Assembly assembly = null)
+    {
+        if (string.IsNullOrWhiteSpace(embeddedResourcePath))
+        {
+            throw new ArgumentException("Value cannot be null or blank.", nameof(embeddedResourcePath));
+        }
+
+        var path = ((string.IsNullOrWhiteSpace(rootNamespace))
+                       ? string.Empty
+                       : ($"{rootNamespace.Trim()}."))
+                   + embeddedResourcePath
+                       .Replace("/", ".")
+                       .Replace("\\", ".")
+                       .Trim();
+
+        return GetResourceAsBytes(path, assembly);
     }
 
     public static string FixLineEndings(string text, LineEndingFixType fixType)
@@ -128,7 +249,7 @@ public static class EmbeddedResourceHelper
                     break;
 
                 case LineEndingFixType.RemoveLineEndingsAndWhiteSpace:
-                    var lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    var lines = text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
                     var sb = new StringBuilder();
 
                     foreach (var line in lines.Where(w => !string.IsNullOrWhiteSpace(w)))

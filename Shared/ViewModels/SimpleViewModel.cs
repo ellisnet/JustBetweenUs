@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 Ellisnet - Jeremy Ellis (jeremy@ellisnet.com)
+   Copyright 2025 Ellisnet - Jeremy Ellis (jeremy@ellisnet.com)
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -11,7 +11,7 @@
    limitations under the License.
 */
 
-//FILE DATE/REVISION: 10/17/2024
+//FILE DATE/REVISION: 2025-01-18
 
 // ReSharper disable RedundantCast
 // ReSharper disable RedundantAssignment
@@ -35,8 +35,12 @@
 // ReSharper disable ConstantConditionalAccessQualifier
 
 #pragma warning disable IDE0079
+#pragma warning disable IDE0051
+#pragma warning disable IDE0290
 
+#pragma warning disable CA1050
 #pragma warning disable CA1416 // Validate platform compatibility (Win UI)
+#pragma warning disable CA1513
 #pragma warning disable CS1591
 
 //Stop warning about things that shouldn't be able to be null
@@ -49,6 +53,9 @@
 #pragma warning disable CS8625
 #pragma warning disable CS8767
 
+#pragma warning disable CsWinRT1028
+#pragma warning disable CsWinRT1030
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -58,9 +65,9 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Text;
 #if (WIN_UI || HAS_UNO) //WIN_UI needs to be manually defined on Win UI projects (and Uno net8.0-windows projects)
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -73,6 +80,16 @@ using Microsoft.Maui.Controls.PlatformConfiguration;
 using Microsoft.Maui.Devices;
 #else
 using System.Windows;
+//IMPORTANT: If this code is being placed in a project that is not the main WPF application project - i.e. if it is placed in a
+//  class library that is referenced by the WPF application - then the project must be set to use the Windows SDK for compilation,
+//  with the following in the .csproj file:
+/*
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+*/
+//Note that this also means that any projects that reference the project containing this code, must also have the TargetFramework
+//  set to 'net8.0-windows' - e.g. Tests projects that test the view models that inherit from SimpleViewModel.
+//  (This is not relevant to WIN_UI or HAS_UNO or MAUI projects that include this file.)
 #endif
 
 #if SIMPLE_ENUM
@@ -104,7 +121,6 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json.Serialization;
 using IO = System.IO;
 using IHttpClientFactory = System.Net.Http.IHttpClientFactory; //Added this line so the problem of missing NuGet package shows up at the top
@@ -176,7 +192,7 @@ public class SimpleDialog : IDisposable
         SimpleDialogButtons buttons = SimpleDialogButtons.OK) => 
         new(xamlRootGetter, dispatcher, message, title, buttons);
 
-    private string BreakOnMaxLineLength(string text, int maxLineLength)
+    private static string BreakOnMaxLineLength(string text, int maxLineLength)
     {
         var result = text;
 
@@ -193,7 +209,7 @@ public class SimpleDialog : IDisposable
                     {
                         var newLine = ((pos + maxLineLength) < line.Length)
                             ? line.Substring(pos, maxLineLength)
-                            : line.Substring(pos);
+                            : line[pos..];
                         sb.AppendLine(newLine);
                         pos += newLine.Length;
                     }
@@ -261,7 +277,8 @@ public class SimpleDialog : IDisposable
             throw new ObjectDisposedException("Dialog has been disposed.");
         }
 
-        var result = SimpleDialogResult.None;
+        // ReSharper disable once JoinDeclarationAndInitializer
+        SimpleDialogResult result;
 
 #if (WIN_UI || HAS_UNO || MAUI)
         string firstButton;
@@ -344,45 +361,24 @@ public class SimpleDialog : IDisposable
         }
 #else
 
-        MessageBoxButton msgButton;
-        switch (Buttons)
+        var msgButton = Buttons switch
         {
-            case SimpleDialogButtons.OK:
-                msgButton = MessageBoxButton.OK;
-                break;
-            case SimpleDialogButtons.OKCancel:
-                msgButton = MessageBoxButton.OKCancel;
-                break;
-            case SimpleDialogButtons.YesNo:
-                msgButton = MessageBoxButton.YesNo;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            SimpleDialogButtons.OK => MessageBoxButton.OK,
+            SimpleDialogButtons.OKCancel => MessageBoxButton.OKCancel,
+            SimpleDialogButtons.YesNo => MessageBoxButton.YesNo,
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
-        MessageBoxResult dialogResult = MessageBox.Show(_message, (_title ?? ""), msgButton);
+        var dialogResult = MessageBox.Show(_message, (_title ?? ""), msgButton);
 
-        switch (dialogResult)
+        result = dialogResult switch
         {
-            case MessageBoxResult.OK:
-                result = SimpleDialogResult.OK;
-                break;
-
-            case MessageBoxResult.Cancel:
-                result = SimpleDialogResult.Cancel;
-                break;
-
-            case MessageBoxResult.Yes:
-                result = SimpleDialogResult.Yes;
-                break;
-
-            case MessageBoxResult.No:
-                result = SimpleDialogResult.No;
-                break;
-
-            default:
-                break;
-        }
+            MessageBoxResult.OK => SimpleDialogResult.OK,
+            MessageBoxResult.Cancel => SimpleDialogResult.Cancel,
+            MessageBoxResult.Yes => SimpleDialogResult.Yes,
+            MessageBoxResult.No => SimpleDialogResult.No,
+            _ => SimpleDialogResult.None
+        };
 
         //satisfy the compiler that something async is happening
         await Task.Run(() => { });
@@ -396,13 +392,22 @@ public class SimpleDialog : IDisposable
 
     public void Dispose()
     {
-        _isDisposed = true;
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _isDisposed = true;
 #if (WIN_UI || HAS_UNO)
-        _xamlRootGetter = null;
-        _dispatcher = null;
+            _xamlRootGetter = null;
+            _dispatcher = null;
 #elif (MAUI)
-        _xamlRootGetter = null;
+            _xamlRootGetter = null;
 #endif
+        }
     }
 
     #endregion
@@ -413,7 +418,7 @@ internal static class DispatcherHelper
 {
     internal static void InvokeOnMainThread(this DispatcherQueue dispatcher, Action functionToExecute)
     {
-        if (dispatcher == null) { throw new ArgumentNullException(nameof(dispatcher));}
+        ArgumentNullException.ThrowIfNull(dispatcher, nameof(dispatcher));
 
         if (functionToExecute != null)
         {
@@ -423,8 +428,8 @@ internal static class DispatcherHelper
 
     internal static Task<T> InvokeOnMainThreadAsync<T>(this DispatcherQueue dispatcher, Func<Task<T>> functionToExecute)
     {
-        if (dispatcher == null) { throw new ArgumentNullException(nameof(dispatcher)); }
-        if (functionToExecute == null) { throw new ArgumentNullException(nameof(functionToExecute)); }
+        ArgumentNullException.ThrowIfNull(dispatcher, nameof(dispatcher));
+        ArgumentNullException.ThrowIfNull(functionToExecute, nameof(functionToExecute));
 
         var completionSource = new TaskCompletionSource<T>();
 
@@ -517,16 +522,18 @@ public abstract class SimpleViewModel : IXamlRootGetter, INotifyPropertyChanged,
 public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 #endif
 {
-    // ReSharper disable once InconsistentNaming
+    // ReSharper disable InconsistentNaming
     private static bool? _isInDesignMode;
+    protected bool _isUnderTest;
+    // ReSharper restore InconsistentNaming
 
 #if (WIN_UI || HAS_UNO || MAUI)
     //Don't currently know how to check and see if the view-model instance is in "design mode" -
     //  for WinUI and .NET MAUI.
-    protected bool IsDesignMode(bool defaultValueIfNotSet) =>
+    protected static bool IsDesignMode(bool defaultValueIfNotSet) =>
         _isInDesignMode ?? defaultValueIfNotSet;
 #else
-    protected bool IsDesignMode(bool? defaultValueIfNotSet = null)
+    protected static bool IsDesignMode(bool? defaultValueIfNotSet = null)
     {
         if (!_isInDesignMode.HasValue)
         {
@@ -625,23 +632,23 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 #endif
 
 #if RESOLVE_SERVICES
-    protected T GetService<T>() where T : class => SimpleServiceResolver.Instance.GetService<T>();
-    protected IEnumerable<T> GetServices<T>() where T : class => SimpleServiceResolver.Instance.GetServices<T>();
+    protected static T GetService<T>() where T : class => SimpleServiceResolver.Instance.GetService<T>();
+    protected static IEnumerable<T> GetServices<T>() where T : class => SimpleServiceResolver.Instance.GetServices<T>();
 #endif
 
 #if SIMPLE_MESSAGING
 
 #if RESOLVE_SERVICES
 
-    protected void MessagingSend<TSender, TArgs>(TSender sender, string message, TArgs args)
+    protected static void MessagingSend<TSender, TArgs>(TSender sender, string message, TArgs args)
         where TSender : class =>
         (GetService<ISimpleMessaging>()).Send(sender, message, args);
 
-    protected void MessagingSend<TSender>(TSender sender, string message)
+    protected static void MessagingSend<TSender>(TSender sender, string message)
         where TSender : class =>
         (GetService<ISimpleMessaging>()).Send(sender, message);
 
-    protected void MessagingSubscribe<TSender, TArgs>(
+    protected static void MessagingSubscribe<TSender, TArgs>(
         object subscriber,
         string message,
         Action<TSender, TArgs> callback,
@@ -649,20 +656,20 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
         where TSender : class =>
         (GetService<ISimpleMessaging>()).Subscribe(subscriber, message, callback, source);
 
-    protected void MessagingSubscribeFrom<TSender>(
+    protected static void MessagingSubscribeFrom<TSender>(
         object subscriber,
         string message,
         Action<TSender> callback,
         TSender source) where TSender : class =>
         (GetService<ISimpleMessaging>()).SubscribeFrom(subscriber, message, callback, source);
 
-    protected void MessagingSubscribe<TArgs>(
+    protected static void MessagingSubscribe<TArgs>(
         object subscriber,
         string message,
         Action<TArgs> callback) =>
         (GetService<ISimpleMessaging>()).Subscribe(subscriber, message, callback);
 
-    protected void MessagingSubscribe<TSender, TArgs>(
+    protected static void MessagingSubscribe<TSender, TArgs>(
         object subscriber,
         string message,
         Func<TSender, TArgs, Task> callback,
@@ -670,41 +677,41 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
         where TSender : class =>
         (GetService<ISimpleMessaging>()).Subscribe(subscriber, message, callback, source);
 
-    protected void MessagingSubscribeFrom<TSender>(
+    protected static void MessagingSubscribeFrom<TSender>(
         object subscriber,
         string message,
         Func<TSender, Task> callback,
         TSender source) where TSender : class =>
         (GetService<ISimpleMessaging>()).SubscribeFrom(subscriber, message, callback, source);
 
-    protected void MessagingSubscribe<TArgs>(
+    protected static void MessagingSubscribe<TArgs>(
         object subscriber,
         string message,
         Func<TArgs, Task> callback) =>
         (GetService<ISimpleMessaging>()).Subscribe(subscriber, message, callback);
 
-    protected void MessagingUnsubscribe<TSender, TArgs>(object subscriber, string message)
+    protected static void MessagingUnsubscribe<TSender, TArgs>(object subscriber, string message)
         where TSender : class =>
         (GetService<ISimpleMessaging>()).Unsubscribe<TSender, TArgs>(subscriber, message);
 
-    protected void MessagingUnsubscribeFrom<TSender>(object subscriber, string message)
+    protected static void MessagingUnsubscribeFrom<TSender>(object subscriber, string message)
         where TSender : class =>
         (GetService<ISimpleMessaging>()).UnsubscribeFrom<TSender>(subscriber, message);
 
-    protected void MessagingUnsubscribe<TArgs>(object subscriber, string message) =>
+    protected static void MessagingUnsubscribe<TArgs>(object subscriber, string message) =>
         (GetService<ISimpleMessaging>()).Unsubscribe<TArgs>(subscriber, message);
 
 #else
 
-    protected void MessagingSend<TSender, TArgs>(TSender sender, string message, TArgs args) 
+    protected static void MessagingSend<TSender, TArgs>(TSender sender, string message, TArgs args) 
         where TSender : class =>
         SimpleMessaging.Send(sender, message, args);
     
-    protected void MessagingSend<TSender>(TSender sender, string message) 
+    protected static void MessagingSend<TSender>(TSender sender, string message) 
         where TSender : class =>
         SimpleMessaging.Send(sender, message);
     
-    protected void MessagingSubscribe<TSender, TArgs>(
+    protected static void MessagingSubscribe<TSender, TArgs>(
         object subscriber, 
         string message, 
         Action<TSender, TArgs> callback, 
@@ -712,20 +719,20 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
         where TSender : class => 
         SimpleMessaging.Subscribe(subscriber, message, callback, source);
     
-    protected void MessagingSubscribeFrom<TSender>(
+    protected static void MessagingSubscribeFrom<TSender>(
         object subscriber, 
         string message, 
         Action<TSender> callback, 
         TSender source) where TSender : class => 
         SimpleMessaging.SubscribeFrom(subscriber, message, callback, source);
     
-    protected void MessagingSubscribe<TArgs>(
+    protected static void MessagingSubscribe<TArgs>(
         object subscriber,
         string message,
         Action<TArgs> callback) =>
         SimpleMessaging.Subscribe(subscriber, message, callback);
 
-    protected void MessagingSubscribe<TSender, TArgs>(
+    protected static void MessagingSubscribe<TSender, TArgs>(
         object subscriber,
         string message,
         Func<TSender, TArgs, Task> callback,
@@ -733,28 +740,28 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
         where TSender : class =>
         SimpleMessaging.Subscribe(subscriber, message, callback, source);
 
-    protected void MessagingSubscribeFrom<TSender>(
+    protected static void MessagingSubscribeFrom<TSender>(
         object subscriber,
         string message,
         Func<TSender, Task> callback,
         TSender source) where TSender : class =>
         SimpleMessaging.SubscribeFrom(subscriber, message, callback, source);
 
-    protected void MessagingSubscribe<TArgs>(
+    protected static void MessagingSubscribe<TArgs>(
         object subscriber,
         string message,
         Func<TArgs, Task> callback) =>
         SimpleMessaging.Subscribe(subscriber, message, callback);
 
-    protected void MessagingUnsubscribe<TSender, TArgs>(object subscriber, string message) 
+    protected static void MessagingUnsubscribe<TSender, TArgs>(object subscriber, string message) 
         where TSender : class =>
         SimpleMessaging.Unsubscribe<TSender, TArgs>(subscriber, message);
     
-    protected void MessagingUnsubscribeFrom<TSender>(object subscriber, string message) 
+    protected static void MessagingUnsubscribeFrom<TSender>(object subscriber, string message) 
         where TSender : class =>
         SimpleMessaging.UnsubscribeFrom<TSender>(subscriber, message);
 
-    protected void MessagingUnsubscribe<TArgs>(object subscriber, string message) =>
+    protected static void MessagingUnsubscribe<TArgs>(object subscriber, string message) =>
         SimpleMessaging.Unsubscribe<TArgs>(subscriber, message);
 
 #endif
@@ -800,7 +807,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
             details = (string.IsNullOrWhiteSpace(details))
                 ? ""
                 : (details.Trim().Length > 200)
-                    ? $"{details.Trim().Substring(0, 195).Trim()}[...]"
+                    ? $"{details.Trim()[..195].Trim()}[...]"
                     : details.Trim();
             message += (details == "")
                 ? ""
@@ -846,7 +853,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 
 #if (WIN_UI || HAS_UNO)
 
-    protected Visibility GetVisibility(bool isVisible) {
+    protected static Visibility GetVisibility(bool isVisible) {
         return isVisible ? Visibility.Visible : Visibility.Collapsed;
     }
 
@@ -858,7 +865,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 
 #elif MAUI
 
-    protected Visibility GetVisibility(bool isVisible)
+    protected static Visibility GetVisibility(bool isVisible)
     {
         return isVisible ? Visibility.Visible : Visibility.Hidden;
     }
@@ -899,17 +906,23 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 
 #else
 
-    protected Visibility GetVisibility(bool isVisible)
-    {
-        return isVisible ? Visibility.Visible : Visibility.Hidden;
-    }
+    protected static Visibility GetVisibility(bool isVisible) => (isVisible) 
+        ? Visibility.Visible 
+        : Visibility.Hidden;
 
     protected virtual void InvokeOnMainThread(Action functionToExecute)
     {
         if (functionToExecute != null)
         {
-            // ReSharper disable once PossibleNullReferenceException
-            Application.Current.Dispatcher.Invoke(functionToExecute.Invoke);
+            if (_isUnderTest && Application.Current?.Dispatcher == null)
+            {
+                functionToExecute.Invoke();
+            }
+            else
+            {
+                // ReSharper disable once PossibleNullReferenceException
+                Application.Current.Dispatcher.Invoke(functionToExecute.Invoke);
+            }
         }
     }
 
@@ -917,19 +930,38 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
     {
         var completionSource = new TaskCompletionSource<T>();
 
-        // ReSharper disable once PossibleNullReferenceException
-        Application.Current.Dispatcher.Invoke(async () =>
+        if (_isUnderTest && Application.Current?.Dispatcher == null)
         {
-            try
+            // ReSharper disable once AsyncVoidLambda
+            new Task(async () =>
             {
-                T result = await functionToExecute.Invoke();
-                completionSource.SetResult(result);
-            }
-            catch (Exception ex)
+                try
+                {
+                    T result = await functionToExecute.Invoke();
+                    completionSource.SetResult(result);
+                }
+                catch (Exception ex)
+                {
+                    completionSource.SetException(ex);
+                }
+            }).Start();
+        }
+        else
+        {
+            // ReSharper disable once PossibleNullReferenceException
+            Application.Current.Dispatcher.Invoke(async () =>
             {
-                completionSource.SetException(ex);
-            }
-        });
+                try
+                {
+                    T result = await functionToExecute.Invoke();
+                    completionSource.SetResult(result);
+                }
+                catch (Exception ex)
+                {
+                    completionSource.SetException(ex);
+                }
+            });
+        }
 
         return completionSource.Task;
     }
@@ -1001,13 +1033,13 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
                 else
                 {
                     //2 - Check for AffectsCommandsAttribute
-                    var affectsCmds = propInfo
+                    var affectsCommands = propInfo
                         .GetCustomAttributes<AffectsCommandsAttribute>(true)
                         .FirstOrDefault();
 
-                    if (affectsCmds != null)
+                    if (affectsCommands != null)
                     {
-                        foreach (var affected in affectsCmds.AffectedCommands)
+                        foreach (var affected in affectsCommands.AffectedCommands)
                         {
                             var cmdPropInfo = propInfos.FirstOrDefault(f => f.Name.Equals(affected,
                                 StringComparison.InvariantCultureIgnoreCase));
@@ -1097,24 +1129,33 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 
     public virtual void Dispose()
     {
-        // remove event handlers before setting event to null
-        Delegate[] delegates = PropertyChanged?.GetInvocationList();
-        if (delegates != null)
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
         {
-            foreach (var d in delegates)
+            // remove event handlers before setting event to null
+            Delegate[] delegates = PropertyChanged?.GetInvocationList();
+            if (delegates != null)
             {
-                PropertyChanged -= (PropertyChangedEventHandler)d;
+                foreach (var d in delegates)
+                {
+                    PropertyChanged -= (PropertyChangedEventHandler)d;
+                }
             }
-        }
-        PropertyChanged = null;
+            PropertyChanged = null;
 
 #if (WIN_UI || HAS_UNO)
-        _dispatcher = null;
+            _dispatcher = null;
 #endif
 
 #if (WIN_UI || HAS_UNO || MAUI)
-        _xamlRootGetter = null;
+            _xamlRootGetter = null;
 #endif
+        }
     }
 
     #endregion
@@ -1126,7 +1167,7 @@ public class AffectsPropertiesAttribute : Attribute
     public IList<string> AffectedProperties { get; }
 
     public AffectsPropertiesAttribute(params string[] propertyNames) =>
-        AffectedProperties = (propertyNames ?? Array.Empty<string>())
+        AffectedProperties = (propertyNames ?? [])
             .Where(w => !string.IsNullOrWhiteSpace(w))
             .Select(s => s.Trim())
             .ToArray();
@@ -1138,7 +1179,7 @@ public class AffectsCommandsAttribute : Attribute
     public IList<string> AffectedCommands { get; }
 
     public AffectsCommandsAttribute(params string[] commandNames) =>
-        AffectedCommands = (commandNames ?? Array.Empty<string>())
+        AffectedCommands = (commandNames ?? [])
             .Where(w => !string.IsNullOrWhiteSpace(w))
             .Select(s => s.Trim())
             .ToArray();
@@ -1309,19 +1350,21 @@ public class SimpleCommand : ICommand, IDisposable
         return result;
     }
 
-    private async void WaitForExecute(TaskCompletionSource tsc, Func<object, Task> execute, object parameter)
+    // ReSharper disable AsyncVoidMethod
+
+    private static async void WaitForExecute(TaskCompletionSource tsc, Func<object, Task> execute, object parameter)
     {
-        if (tsc == null) { throw new ArgumentNullException(nameof(tsc)); }
-        if (execute == null) { throw new ArgumentNullException(nameof(execute)); }
+        ArgumentNullException.ThrowIfNull(tsc, nameof(tsc));
+        ArgumentNullException.ThrowIfNull(execute, nameof(execute));
 
         await execute.Invoke(parameter);
         tsc.SetResult();
     }
 
-    private async void WaitForExecute(TaskCompletionSource tsc, Func<Task> execute)
+    private static async void WaitForExecute(TaskCompletionSource tsc, Func<Task> execute)
     {
-        if (tsc == null) { throw new ArgumentNullException(nameof(tsc)); }
-        if (execute == null) { throw new ArgumentNullException(nameof(execute)); }
+        ArgumentNullException.ThrowIfNull(tsc, nameof(tsc));
+        ArgumentNullException.ThrowIfNull(execute, nameof(execute));
 
         await execute.Invoke();
         tsc.SetResult();
@@ -1421,6 +1464,8 @@ public class SimpleCommand : ICommand, IDisposable
         }
     }
 
+    // ReSharper restore AsyncVoidMethod
+
     public void RaiseCanExecuteChanged()
     {
         CanExecuteChanged?.Invoke(this, EventArgs.Empty);
@@ -1430,27 +1475,36 @@ public class SimpleCommand : ICommand, IDisposable
 
     public void Dispose()
     {
-        // remove event handlers before setting event to null
-        Delegate[] delegates = CanExecuteChanged?.GetInvocationList();
-        if (delegates != null)
-        {
-            foreach (var d in delegates)
-            {
-                CanExecuteChanged -= (EventHandler)d;
-            }
-        }
-        CanExecuteChanged = null;
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-        _canExecuteWithParam = null;
-        _executeWithParamSync = null;
-        _executeWithParamAsync = null;
-        _canExecuteNoParam = null;
-        _executeNoParamSync = null;
-        _executeNoParamAsync = null;
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            // remove event handlers before setting event to null
+            Delegate[] delegates = CanExecuteChanged?.GetInvocationList();
+            if (delegates != null)
+            {
+                foreach (var d in delegates)
+                {
+                    CanExecuteChanged -= (EventHandler)d;
+                }
+            }
+            CanExecuteChanged = null;
+
+            _canExecuteWithParam = null;
+            _executeWithParamSync = null;
+            _executeWithParamAsync = null;
+            _canExecuteNoParam = null;
+            _executeNoParamSync = null;
+            _executeNoParamAsync = null;
 
 #if (WIN_UI || HAS_UNO)
         _dispatcher = null;
 #endif
+        }
     }
 }
 
@@ -1525,10 +1579,10 @@ public static class SimpleEnumHelper
     private static readonly object Locker = new();
 
     //Item1 = the Enum type
-    private static readonly Dictionary<Type, Dictionary<string, object>> EnumDictionary = new();
+    private static readonly Dictionary<Type, Dictionary<string, object>> EnumDictionary = [];
 
     //Item1 = the SimpleEnumInfo type
-    private static readonly Dictionary<Type, Dictionary<string, object>> InfoDictionary = new();
+    private static readonly Dictionary<Type, Dictionary<string, object>> InfoDictionary = [];
 
     // ReSharper restore InconsistentNaming
 
@@ -1590,22 +1644,22 @@ public static class SimpleEnumHelper
                         {
                             object memberInfo = null;
                             // ReSharper disable once ConstantConditionalAccessQualifier
-                            var attribs = enumType
+                            var attributes = enumType
                                 .GetMember(memberName)
                                 .FirstOrDefault(f => f.DeclaringType == enumType)?
                                 .GetCustomAttributes(true)?
                                 .Where(w => w.GetType().IsAssignableTo(typeof(ISimpleEnumInfoAttribute)))
                                 .Select(s => s as ISimpleEnumInfoAttribute)
-                                .ToArray() ?? Array.Empty<ISimpleEnumInfoAttribute>();
+                                .ToArray() ?? [];
 
-                            if (attribs.Length > 1)
+                            if (attributes.Length > 1)
                             {
                                 throw new TypeLoadException(
                                     $"The {enumType.Name}.{memberName} enum member cannot have more than one instance of SimpleEnumAttribute assigned to it.");
                             }
-                            else if (attribs.Length == 1)
+                            else if (attributes.Length == 1)
                             {
-                                var attrib = attribs[0];
+                                var attrib = attributes[0];
                                 infoType ??= attrib.InfoType;
 
                                 if (infoType != null && attrib.InfoType != null && infoType == attrib.InfoType)
@@ -1973,6 +2027,7 @@ public class SimpleMessaging : ISimpleMessaging
         private MaybeWeakReference DelegateSource { get; }
         private MethodInfo SyncMethod { get; set; }
         private Func<object, object, Task> AsyncMethod { get; set; }
+        // ReSharper disable once MemberHidesStaticFromOuterClass
         private Filter Filter { get; }
         private SemaphoreSlim _asyncLocker = new(1, 1);
         private bool _isDisposed;
@@ -2059,7 +2114,7 @@ public class SimpleMessaging : ISimpleMessaging
         #endregion
     }
 
-    private readonly Dictionary<Sender, List<Subscription>> _subscriptions = new();
+    private readonly Dictionary<Sender, List<Subscription>> _subscriptions = [];
     private readonly object _subscriptionLocker = new();
 
     private void InnerSend(
@@ -2069,7 +2124,7 @@ public class SimpleMessaging : ISimpleMessaging
         object sender,
         object args)
     {
-        if (message == null) { throw new ArgumentNullException(nameof(message)); }
+        ArgumentNullException.ThrowIfNull(message, nameof(message));
 
         //Item1 = the subscription
         //Item2 = is it explicit?
@@ -2117,7 +2172,7 @@ public class SimpleMessaging : ISimpleMessaging
         Func<object, object, Task> asyncMethod,
         Filter filter)
     {
-        if (message == null) { throw new ArgumentNullException(nameof(message)); }
+        ArgumentNullException.ThrowIfNull(message, nameof(message));
 
         var key = new Sender(message, senderType, argType);
         var value = new Subscription(subscriber, target, syncMethod, asyncMethod, filter);
@@ -2141,8 +2196,8 @@ public class SimpleMessaging : ISimpleMessaging
         Type argType,
         object subscriber)
     {
-        if (subscriber == null) { throw new ArgumentNullException(nameof(subscriber)); }
-        if (message == null) { throw new ArgumentNullException(nameof(message)); }
+        ArgumentNullException.ThrowIfNull(subscriber, nameof(subscriber));
+        ArgumentNullException.ThrowIfNull(message, nameof(message));
 
         var key = new Sender(message, senderType, argType);
         lock (_subscriptionLocker)
@@ -2156,7 +2211,7 @@ public class SimpleMessaging : ISimpleMessaging
                     f?.Dispose();
                     subs.Remove(f);
                 });
-                if (!subs.Any()) { _subscriptions.Remove(key); }
+                if (subs.Count < 1) { _subscriptions.Remove(key); }
             }
         }
     }
@@ -2232,13 +2287,13 @@ public class SimpleMessaging : ISimpleMessaging
 
     void ISimpleMessaging.Send<TSender, TArgs>(TSender sender, string message, TArgs args)
     {
-        if (sender == null) { throw new ArgumentNullException(nameof(sender)); }
+        ArgumentNullException.ThrowIfNull(sender, nameof(sender));
         InnerSend(message, typeof(TSender), typeof(TArgs), sender, args);
     }
 
     void ISimpleMessaging.Send<TSender>(TSender sender, string message)
     {
-        if (sender == null) { throw new ArgumentNullException(nameof(sender)); }
+        ArgumentNullException.ThrowIfNull(sender, nameof(sender));
         InnerSend(message, typeof(TSender), null, sender, null);
     }
 
@@ -2249,8 +2304,8 @@ public class SimpleMessaging : ISimpleMessaging
         TSender source)
         where TSender : class
     {
-        if (subscriber == null) { throw new ArgumentNullException(nameof(subscriber)); }
-        if (callback == null) { throw new ArgumentNullException(nameof(callback)); }
+        ArgumentNullException.ThrowIfNull(subscriber, nameof(subscriber));
+        ArgumentNullException.ThrowIfNull(callback, nameof(callback));
 
         InnerSubscribe(subscriber, message, typeof(TSender), typeof(TArgs), callback.Target, callback.GetMethodInfo(), null,
             filter: (sender) =>
@@ -2267,8 +2322,8 @@ public class SimpleMessaging : ISimpleMessaging
         TSender source)
         where TSender : class
     {
-        if (subscriber == null) { throw new ArgumentNullException(nameof(subscriber)); }
-        if (callback == null) { throw new ArgumentNullException(nameof(callback)); }
+        ArgumentNullException.ThrowIfNull(subscriber, nameof(subscriber));
+        ArgumentNullException.ThrowIfNull(callback, nameof(callback));
 
         InnerSubscribe(subscriber, message, typeof(TSender), null, callback.Target, callback.GetMethodInfo(), null,
             filter: (sender) =>
@@ -2280,8 +2335,8 @@ public class SimpleMessaging : ISimpleMessaging
 
     void ISimpleMessaging.Subscribe<TArgs>(object subscriber, string message, Action<TArgs> callback)
     {
-        if (subscriber == null) { throw new ArgumentNullException(nameof(subscriber)); }
-        if (callback == null) { throw new ArgumentNullException(nameof(callback)); }
+        ArgumentNullException.ThrowIfNull(subscriber, nameof(subscriber));
+        ArgumentNullException.ThrowIfNull(callback, nameof(callback));
 
         InnerSubscribe(subscriber, message, typeof(object), typeof(TArgs), callback.Target, callback.GetMethodInfo(), null,
             filter: _ => true); //filter won't be used, for 'generic' object subscriptions
@@ -2294,8 +2349,8 @@ public class SimpleMessaging : ISimpleMessaging
         TSender source)
         where TSender : class
     {
-        if (subscriber == null) { throw new ArgumentNullException(nameof(subscriber)); }
-        if (callback == null) { throw new ArgumentNullException(nameof(callback)); }
+        ArgumentNullException.ThrowIfNull(subscriber, nameof(subscriber));
+        ArgumentNullException.ThrowIfNull(callback, nameof(callback));
 
         Task AsyncMethod(object sender, object args)
         {
@@ -2325,8 +2380,8 @@ public class SimpleMessaging : ISimpleMessaging
         TSender source)
         where TSender : class
     {
-        if (subscriber == null) { throw new ArgumentNullException(nameof(subscriber)); }
-        if (callback == null) { throw new ArgumentNullException(nameof(callback)); }
+        ArgumentNullException.ThrowIfNull(subscriber, nameof(subscriber));
+        ArgumentNullException.ThrowIfNull(callback, nameof(callback));
 
         Task AsyncMethod(object sender, object args)
         {
@@ -2350,8 +2405,8 @@ public class SimpleMessaging : ISimpleMessaging
 
     void ISimpleMessaging.Subscribe<TArgs>(object subscriber, string message, Func<TArgs, Task> callback)
     {
-        if (subscriber == null) { throw new ArgumentNullException(nameof(subscriber)); }
-        if (callback == null) { throw new ArgumentNullException(nameof(callback)); }
+        ArgumentNullException.ThrowIfNull(subscriber, nameof(subscriber));
+        ArgumentNullException.ThrowIfNull(callback, nameof(callback));
 
         Task AsyncMethod(object sender, object args)
         {
@@ -2441,7 +2496,7 @@ public class SimpleHttpClientFactory : ISimpleHttpClientFactory
         }
     }
 
-    private readonly Dictionary<string, HttpClientReference> _handlers = new();
+    private readonly Dictionary<string, HttpClientReference> _handlers = [];
     private readonly object _handlerLocker = new();
 
     private SimpleHttpClient GetClient(string name)
@@ -2460,17 +2515,16 @@ public class SimpleHttpClientFactory : ISimpleHttpClientFactory
             {
                 HttpClientHandler handler = null;
 
-                if (_handlers.ContainsKey(key))
+                if (_handlers.TryGetValue(key, out var current))
                 {
-                    var reference = _handlers[key];
-                    if (reference.ReferenceCount > 0)
+                    if (current.ReferenceCount > 0)
                     {
-                        reference.IncrementReferenceCount();
-                        handler = reference.Handler;
+                        current.IncrementReferenceCount();
+                        handler = current.Handler;
                     }
                     else
                     {
-                        reference.DecrementReferenceCount();
+                        current.DecrementReferenceCount();
                         _handlers.Remove(key);
                     }
                 }
@@ -2501,9 +2555,8 @@ public class SimpleHttpClientFactory : ISimpleHttpClientFactory
         {
             lock (_handlerLocker)
             {
-                if (_handlers.ContainsKey(key))
+                if (_handlers.TryGetValue(key, out var reference))
                 {
-                    var reference = _handlers[key];
                     reference.DecrementReferenceCount();
                     if (reference.ReferenceCount < 1)
                     {
@@ -2577,7 +2630,7 @@ public class SimpleHttpClient : HttpClient, IDisposable
         set => _jsonSaveFolder = (string.IsNullOrWhiteSpace(value)) ? null : value.Trim();
     }
 
-    private string GetQueryPropertyValue(object queryParams, PropertyInfo property)
+    private static string GetQueryPropertyValue(object queryParams, PropertyInfo property)
     {
         var result = string.Empty;
 
@@ -2593,7 +2646,7 @@ public class SimpleHttpClient : HttpClient, IDisposable
         return result;
     }
 
-    private string GetApiPath(string api, object queryParams)
+    private static string GetApiPath(string api, object queryParams)
     {
         var result = string.Empty;
 
@@ -2623,10 +2676,10 @@ public class SimpleHttpClient : HttpClient, IDisposable
     {
         _clientName = (string.IsNullOrWhiteSpace(name)) ? string.Empty : name.Trim().ToLowerInvariant();
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
-        if (handler == null) { throw new ArgumentNullException(nameof(handler));}
+        ArgumentNullException.ThrowIfNull(handler, nameof(handler));
     }
 
-    private byte[] GetFormattedJsonBytes(string json)
+    private static byte[] GetFormattedJsonBytes(string json)
     {
         byte[] result = null;
 
@@ -2665,7 +2718,7 @@ public class SimpleHttpClient : HttpClient, IDisposable
                                    + $"_{((string.IsNullOrWhiteSpace(caller)) ? "HttpOperation" : caller.Trim())}"
                                    + "_Request.json");
                     await using var fs = new IO.FileStream(filePath, IO.FileMode.CreateNew, IO.FileAccess.ReadWrite);
-                    await fs.WriteAsync(jsonBytes, 0, jsonBytes.Length, default);
+                    await fs.WriteAsync(jsonBytes, CancellationToken.None);
                 }
                 catch (Exception)
                 {
@@ -2690,7 +2743,7 @@ public class SimpleHttpClient : HttpClient, IDisposable
                                                                    + $"_{((string.IsNullOrWhiteSpace(caller)) ? "HttpOperation" : caller.Trim())}"
                                                                    + "_Response.json");
                     await using var fs = new IO.FileStream(filePath, IO.FileMode.CreateNew, IO.FileAccess.ReadWrite);
-                    await fs.WriteAsync(jsonBytes, 0, jsonBytes.Length, default);
+                    await fs.WriteAsync(jsonBytes, CancellationToken.None);
                 }
                 catch (Exception)
                 {
@@ -2825,13 +2878,21 @@ public class SimpleHttpClient : HttpClient, IDisposable
 
     public new void Dispose()
     {
-        if (!_isDisposed)
+        DisposeThis(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected override void Dispose(bool disposing) => DisposeThis(disposing);
+
+    protected virtual void DisposeThis(bool disposing)
+    {
+        if (disposing && (!_isDisposed))
         {
             _isDisposed = true;
-            base.Dispose();
             _factory?.DeregisterClient(_clientName);
             _factory = null;
         }
+        base.Dispose(disposing);
     }
 
     #endregion
@@ -2879,6 +2940,8 @@ public class RunUnixShellCommandResult
     public void SetComplete() => IsComplete = true;
 }
 
+#pragma warning disable CA1822
+
 public class OsVersionInfo
 {
     public string VersionNumber { get; set; }
@@ -2904,7 +2967,7 @@ public class OsVersionInfo
             }
             else if (MajorVersion > 0 || MinorVersion.HasValue)
             {
-                sb.Append(MajorVersion.ToString());
+                sb.Append(MajorVersion);
                 if (MinorVersion.HasValue)
                 {
                     sb.Append($".{MinorVersion.Value}");
@@ -3052,7 +3115,7 @@ public class SimpleOsInfo
     public static Task<SimpleOsInfo> GatherInfo(bool withConsoleOutput = false) =>
         (new SimpleOsInfo()).Gather(withConsoleOutput);
 
-    private (int MajorVersion, int? MinorVersion, int? BuildVersion, int? RevisionVersion) GetVersionParts(string versionText)
+    private static (int MajorVersion, int? MinorVersion, int? BuildVersion, int? RevisionVersion) GetVersionParts(string versionText)
     {
         var majorVersion = 0;
         int? minorVersion, buildVersion;
@@ -3086,7 +3149,7 @@ public class SimpleOsInfo
         return (majorVersion, minorVersion, buildVersion, revisionVersion);
     }
     
-    private Dictionary<string, string> GetInfoDictionary(IList<string> infoLines, char assignmentChar)
+    private static Dictionary<string, string> GetInfoDictionary(IList<string> infoLines, char assignmentChar)
     {
         var result = new Dictionary<string, string>();
 
@@ -3102,7 +3165,7 @@ public class SimpleOsInfo
                     var key = lineParts[0];
                     var value = string.Join(assignmentChar, lineParts[1..]);
 
-                    if (value.StartsWith("\"") && value.EndsWith("\""))
+                    if (value.StartsWith('\"') && value.EndsWith('\"'))
                     {
                         value = value.TrimStart('\"').TrimEnd('\"').Trim();
                     }
@@ -3137,11 +3200,11 @@ public class SimpleOsInfo
 
                 result.VersionNumber = version;
 
-                var versionParts = GetVersionParts(version);
-                result.MajorVersion = versionParts.MajorVersion;
-                result.MinorVersion = versionParts.MinorVersion;
-                result.BuildVersion = versionParts.BuildVersion;
-                result.RevisionVersion = versionParts.RevisionVersion;
+                var (majorVersion, minorVersion, buildVersion, revisionVersion) = GetVersionParts(version);
+                result.MajorVersion = majorVersion;
+                result.MinorVersion = minorVersion;
+                result.BuildVersion = buildVersion;
+                result.RevisionVersion = revisionVersion;
                 
                 #endregion
 
@@ -3153,7 +3216,7 @@ public class SimpleOsInfo
 
                 var infoDictionary = GetInfoDictionary(shellResult.OutputLines, '=');
                 
-                if (!(infoDictionary?.Any() ?? false)) { break; }
+                if (infoDictionary is not { Count: > 0 }) { break; }
 
                 if (infoDictionary.TryGetValue("VERSION_CODENAME", out var codename)
                     && (!string.IsNullOrWhiteSpace(codename)))
@@ -3215,7 +3278,7 @@ public class SimpleOsInfo
 
                 var infoDictionary = GetInfoDictionary(shellResult.OutputLines, '=');
                 
-                if (!(infoDictionary?.Any() ?? false)) { break; }
+                if (infoDictionary is not { Count: > 0 }) { break; }
 
                 if (infoDictionary.TryGetValue("VERSION", out var version)
                     && (!string.IsNullOrWhiteSpace(version)))
@@ -3231,11 +3294,11 @@ public class SimpleOsInfo
                     result.IsLongTermSupported =
                         versionTextParts.Any(a => a.Equals("LTS", StringComparison.InvariantCultureIgnoreCase));
                     
-                    var versionParts = GetVersionParts(versionTextParts[0]);
-                    result.MajorVersion = versionParts.MajorVersion;
-                    result.MinorVersion = versionParts.MinorVersion;
-                    result.BuildVersion = versionParts.BuildVersion;
-                    result.RevisionVersion = versionParts.RevisionVersion;
+                    var (majorVersion, minorVersion, buildVersion, revisionVersion) = GetVersionParts(versionTextParts[0]);
+                    result.MajorVersion = majorVersion;
+                    result.MinorVersion = minorVersion;
+                    result.BuildVersion = buildVersion;
+                    result.RevisionVersion = revisionVersion;
                 }
                 
                 if (infoDictionary.TryGetValue("VERSION_CODENAME", out var codename)
@@ -3292,7 +3355,7 @@ public class SimpleOsInfo
 
                 var infoDictionary = GetInfoDictionary(shellResult.OutputLines, '=');
                 
-                if (!(infoDictionary?.Any() ?? false)) { break; }
+                if (infoDictionary is not { Count: > 0 }) { break; }
 
                 if (infoDictionary.TryGetValue("VERSION", out var version)
                     && (!string.IsNullOrWhiteSpace(version)))
@@ -3308,11 +3371,11 @@ public class SimpleOsInfo
                     result.IsLongTermSupported =
                         versionTextParts.Any(a => a.Equals("LTS", StringComparison.InvariantCultureIgnoreCase));
                     
-                    var versionParts = GetVersionParts(versionTextParts[0]);
-                    result.MajorVersion = versionParts.MajorVersion;
-                    result.MinorVersion = versionParts.MinorVersion;
-                    result.BuildVersion = versionParts.BuildVersion;
-                    result.RevisionVersion = versionParts.RevisionVersion;
+                    var (majorVersion, minorVersion, buildVersion, revisionVersion) = GetVersionParts(versionTextParts[0]);
+                    result.MajorVersion = majorVersion;
+                    result.MinorVersion = minorVersion;
+                    result.BuildVersion = buildVersion;
+                    result.RevisionVersion = revisionVersion;
                 }
                 
                 if (infoDictionary.TryGetValue("VERSION_CODENAME", out var codename)
@@ -3415,7 +3478,7 @@ public class SimpleOsInfo
                     Console.WriteLine("Windows identity found -");
                     Console.WriteLine($"Name: {identity.Name}");
                     var claims = identity.Claims?.ToArray();
-                    if (claims?.Any() ?? false)
+                    if (claims is { Length: > 0 })
                     {
                         Console.WriteLine("User claims:");
                         foreach (var claim in claims)
@@ -3495,22 +3558,22 @@ public class SimpleOsInfo
                 {
                     result.BasedOnVersion = basedOn.Trim();
 
-                    var darwinVersion =
+                    var (majorVersion, _, _, _) = 
                         GetVersionParts(basedOn.Replace("darwin", "", StringComparison.InvariantCultureIgnoreCase));
-                    if (darwinVersion.MajorVersion > 0)
+                    if (majorVersion > 0)
                     {
-                        if (MacOsCodenames.Any(a => a.DarwinVersion == darwinVersion.MajorVersion))
+                        if (MacOsCodenames.Any(a => a.DarwinVersion == majorVersion))
                         {
                             result.VersionCodename = MacOsCodenames
-                                .First(f => f.DarwinVersion == darwinVersion.MajorVersion)
+                                .First(f => f.DarwinVersion == majorVersion)
                                 .Codename;
                         }
                         else
                         {
-                            var codename = MacOsCodenames.MaxBy(o => o.DarwinVersion);
-                            if (darwinVersion.MajorVersion > codename.DarwinVersion)
+                            var (darwinMajor, codename) = MacOsCodenames.MaxBy(o => o.DarwinVersion);
+                            if (majorVersion > darwinMajor)
                             {
-                                result.VersionCodename = $"newer than {codename.Codename}";
+                                result.VersionCodename = $"newer than {codename}";
                             }
                         }
                     }
@@ -3535,7 +3598,7 @@ public class SimpleOsInfo
         }
     }
 
-    private OsVersionInfo GetAndroidVersionInfo()
+    private static OsVersionInfo GetAndroidVersionInfo()
     {
         var result = new OsVersionInfo
         {
@@ -3591,7 +3654,9 @@ public class SimpleOsInfo
 #elif HAS_UNO
         try
         {
+#pragma warning disable Uno0001  //This code section is only active on Android
             var encoded = Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamilyVersion;
+#pragma warning restore Uno0001
             var v = ulong.Parse(encoded);
             major = (int)(ushort)((v & 0xFFFF000000000000L) >> 48);
             minor = (int)(ushort)((v & 0x0000FFFF00000000L) >> 32);
@@ -3769,7 +3834,7 @@ public class SimpleOsInfo
                 switch (LinuxDistro)
                 {
                     case IdentifiedLinuxDistro.Alpine:
-                        //TODO:
+                        //TODO: Add Alpine support
                         break;
                     
                     case IdentifiedLinuxDistro.Debian:
@@ -3833,7 +3898,7 @@ public class SimpleOsInfo
         return result;
     }
 
-    public async Task<RunUnixShellCommandResult> RunUnixShellCommand(
+    public static async Task<RunUnixShellCommandResult> RunUnixShellCommand(
         string command,
         string args = null,
         bool ignoreWarnings = true,
@@ -3851,6 +3916,8 @@ public class SimpleOsInfo
         else
         {
             var tcs = new TaskCompletionSource<RunUnixShellCommandResult>();
+
+#pragma warning disable IDE0039
 
             var shellTask = async () =>
             {
@@ -3876,7 +3943,7 @@ public class SimpleOsInfo
                             CreateNoWindow = true,
                         }
                     };
-                    process.Start();  //TODO: Can't use this line on iOS; will have to find an alternative, or just make code unavailable
+                    process.Start(); //TODO: Need to block access to this line on iOS
 
                     var output = await process.StandardOutput.ReadToEndAsync();
                     var error = await process.StandardError.ReadToEndAsync();
@@ -3913,7 +3980,7 @@ public class SimpleOsInfo
 
                         if (ignoreWarnings)
                         {
-                            error = (removeWarnings.Any())
+                            error = (removeWarnings.Count > 0)
                                 ? string.Join('\n', removeWarnings)
                                 : string.Empty;
                         }
@@ -3965,11 +4032,15 @@ public class SimpleOsInfo
 
             _ = shellTask.Invoke();
 
+#pragma warning restore IDE0039
+
             result = await tcs.Task;
         }
 
         return result;
     }
 }
+
+#pragma warning disable CA1822
 
 #endregion
