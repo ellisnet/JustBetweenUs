@@ -11,7 +11,7 @@
    limitations under the License.
 */
 
-//FILE DATE/REVISION: 2025-01-18
+//FILE DATE/REVISION: 2025-03-30
 
 // ReSharper disable RedundantCast
 // ReSharper disable RedundantAssignment
@@ -118,10 +118,11 @@ using System.Threading;
 #if SIMPLE_HTTP_CLIENT
 //Requires NuGet package: Microsoft.Extensions.Http
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Net.Http.Headers;
 using System.Text.Json.Serialization;
+using System.Threading;
 using IO = System.IO;
 using IHttpClientFactory = System.Net.Http.IHttpClientFactory; //Added this line so the problem of missing NuGet package shows up at the top
 #endif
@@ -985,6 +986,21 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
     protected virtual void ThisPropertyChanged([CallerMemberName] string propertyName = "") =>
         NotifyPropertyChanged(propertyName);
 
+    protected virtual void RaiseCanExecuteChanged(SimpleCommand command, bool invokeOnMain = true)
+    {
+        if (command != null)
+        {
+            if (invokeOnMain)
+            {
+                InvokeOnMainThread(command.RaiseCanExecuteChanged);
+            }
+            else
+            {
+                command.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
     protected virtual void CheckAffectedProperties(string propertyName)
     {
         if (!string.IsNullOrWhiteSpace(propertyName))
@@ -1027,7 +1043,10 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
                 {
                     foreach (var cmdPropInfo in propInfos.Where(w => w.PropertyType == typeof(SimpleCommand)))
                     {
-                        (cmdPropInfo.GetValue(this) as SimpleCommand)?.RaiseCanExecuteChanged();
+                        if (cmdPropInfo.GetValue(this) is SimpleCommand cmd)
+                        {
+                            InvokeOnMainThread(cmd.RaiseCanExecuteChanged);
+                        }
                     }
                 }
                 else
@@ -1043,9 +1062,9 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
                         {
                             var cmdPropInfo = propInfos.FirstOrDefault(f => f.Name.Equals(affected,
                                 StringComparison.InvariantCultureIgnoreCase));
-                            if (cmdPropInfo != null)
+                            if (cmdPropInfo != null && cmdPropInfo.GetValue(this) is SimpleCommand cmd)
                             {
-                                (cmdPropInfo.GetValue(this) as SimpleCommand)?.RaiseCanExecuteChanged();
+                                InvokeOnMainThread(cmd.RaiseCanExecuteChanged);
                             }
                         }
                     }
