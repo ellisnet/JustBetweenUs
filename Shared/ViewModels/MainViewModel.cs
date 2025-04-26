@@ -241,9 +241,13 @@ public class MainViewModel : SimpleViewModel, ICopyToClipboard
             sb.AppendLine($"Operating system version: {_osInfo.OsVersion}");
             sb.AppendLine($"Product name: {_osInfo.ProductName}");
             sb.AppendLine($"Product name (for display): {_osInfo.ProductNameDisplay}");
+
+            //Note that when running via Uno on Android, the following lines will not be displayed - since
+            //  the SimpleDialog text is truncated on this platform - it must have a maximum number of lines.
             sb.AppendLine($"Running as user: {_osInfo.RunningAsUser}{((_osInfo.IsAdminUser is true) ? " (local admin)" : "")}");
             sb.AppendLine($"DotNet version: {_osInfo.DotNetVersion}");
             sb.AppendLine($"Platform architecture: {_osInfo.PlatformArchitecture}");
+
             await ShowInfo(sb.ToString());
         }
     }

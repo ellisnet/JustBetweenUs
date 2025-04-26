@@ -11,7 +11,7 @@
    limitations under the License.
 */
 
-//FILE DATE/REVISION: 2025-03-30
+//FILE DATE/REVISION: 2025-04-26
 
 // ReSharper disable RedundantCast
 // ReSharper disable RedundantAssignment
@@ -986,20 +986,8 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
     protected virtual void ThisPropertyChanged([CallerMemberName] string propertyName = "") =>
         NotifyPropertyChanged(propertyName);
 
-    protected virtual void RaiseCanExecuteChanged(SimpleCommand command, bool invokeOnMain = true)
-    {
-        if (command != null)
-        {
-            if (invokeOnMain)
-            {
-                InvokeOnMainThread(command.RaiseCanExecuteChanged);
-            }
-            else
-            {
-                command.RaiseCanExecuteChanged();
-            }
-        }
-    }
+    protected virtual void RaiseCanExecuteChanged(SimpleCommand command) =>
+        command?.RaiseCanExecuteChanged();
 
     protected virtual void CheckAffectedProperties(string propertyName)
     {
@@ -1043,10 +1031,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
                 {
                     foreach (var cmdPropInfo in propInfos.Where(w => w.PropertyType == typeof(SimpleCommand)))
                     {
-                        if (cmdPropInfo.GetValue(this) is SimpleCommand cmd)
-                        {
-                            InvokeOnMainThread(cmd.RaiseCanExecuteChanged);
-                        }
+                        (cmdPropInfo.GetValue(this) as SimpleCommand)?.RaiseCanExecuteChanged();
                     }
                 }
                 else
@@ -1062,10 +1047,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
                         {
                             var cmdPropInfo = propInfos.FirstOrDefault(f => f.Name.Equals(affected,
                                 StringComparison.InvariantCultureIgnoreCase));
-                            if (cmdPropInfo != null && cmdPropInfo.GetValue(this) is SimpleCommand cmd)
-                            {
-                                InvokeOnMainThread(cmd.RaiseCanExecuteChanged);
-                            }
+                            (cmdPropInfo?.GetValue(this) as SimpleCommand)?.RaiseCanExecuteChanged();
                         }
                     }
                 }
@@ -1211,6 +1193,12 @@ public class SimpleCommand : ICommand, IDisposable
 {
 #if (WIN_UI || HAS_UNO)
     private DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
+
+    private DispatcherQueue GetDispatcher()
+    {
+        _dispatcher ??= DispatcherQueue.GetForCurrentThread();
+        return _dispatcher;
+    }
 #endif
 
     private enum ExecuteStyle
@@ -1234,13 +1222,14 @@ public class SimpleCommand : ICommand, IDisposable
 
     private Func<object, bool> _canExecuteWithParam; //allows passing an object parameter to function
     private Func<bool> _canExecuteNoParam; //no parameter passing
-    private readonly bool _executeOnMainThread;
+
+    public bool ShouldExecuteOnMainThread { get; set; }
+    public bool ShouldRaiseCanExecuteOnMainThread { get; set; } = true;
 
     private SimpleCommand(
         Func<object, bool> canExecuteWithParam, Action<object> executeWithParamSync, Func<object, Task> executeWithParamAsync,
         Func<bool> canExecuteNoParam, Action executeNoParamSync, Func<Task> executeNoParamAsync,
-        bool executeOnMainThread,
-        ExecuteStyle executeStyle)
+        bool shouldExecuteOnMainThread, ExecuteStyle executeStyle)
     {
         _canExecuteWithParam = canExecuteWithParam;
         _executeWithParamSync = executeWithParamSync;
@@ -1248,7 +1237,7 @@ public class SimpleCommand : ICommand, IDisposable
         _canExecuteNoParam = canExecuteNoParam;
         _executeNoParamSync = executeNoParamSync;
         _executeNoParamAsync = executeNoParamAsync;
-        _executeOnMainThread = executeOnMainThread;
+        ShouldExecuteOnMainThread = shouldExecuteOnMainThread;
         _executeStyle = executeStyle;
     }
 
@@ -1393,7 +1382,7 @@ public class SimpleCommand : ICommand, IDisposable
     {
         if (IsExecutable)
         {
-            var executeOnMain = _executeOnMainThread;
+            var executeOnMain = ShouldExecuteOnMainThread;
 
 #if MAUI
             //Check to see if we are already on the main thread
@@ -1406,7 +1395,16 @@ public class SimpleCommand : ICommand, IDisposable
                     if (executeOnMain)
                     {
 #if (WIN_UI || HAS_UNO)
-                        _dispatcher.TryEnqueue(() => { _executeWithParamSync.Invoke(parameter); });
+                        var dispatcher = GetDispatcher();
+                        if (dispatcher != null)
+                        {
+                            dispatcher.TryEnqueue(() => { _executeWithParamSync.Invoke(parameter); });
+                        }
+                        else
+                        {
+                            //dispatcher not available, try executing directly
+                            _executeWithParamSync.Invoke(parameter);
+                        }
 #elif MAUI
                         await MainThread.InvokeOnMainThreadAsync(() => { _executeWithParamSync.Invoke(parameter); });
 #else
@@ -1423,7 +1421,16 @@ public class SimpleCommand : ICommand, IDisposable
                     if (executeOnMain)
                     {
 #if (WIN_UI || HAS_UNO)
-                        _dispatcher.TryEnqueue(_executeNoParamSync.Invoke);
+                        var dispatcher = GetDispatcher();
+                        if (dispatcher != null)
+                        {
+                            dispatcher.TryEnqueue(_executeNoParamSync.Invoke);
+                        }
+                        else
+                        {
+                            //dispatcher not available, try executing directly
+                            _executeNoParamSync.Invoke();
+                        }
 #elif MAUI
                         await MainThread.InvokeOnMainThreadAsync(() => { _executeNoParamSync.Invoke(); });
 #else
@@ -1440,11 +1447,20 @@ public class SimpleCommand : ICommand, IDisposable
                     if (executeOnMain)
                     {
 #if (WIN_UI || HAS_UNO)
-                        var tsc = new TaskCompletionSource();
-                        var queued = _dispatcher.TryEnqueue(() => { WaitForExecute(tsc, _executeWithParamAsync, parameter); });
-                        if (queued)
+                        var dispatcher = GetDispatcher();
+                        if (dispatcher != null)
                         {
-                            await tsc.Task;
+                            var tsc = new TaskCompletionSource();
+                            var queued = dispatcher.TryEnqueue(() => { WaitForExecute(tsc, _executeWithParamAsync, parameter); });
+                            if (queued)
+                            {
+                                await tsc.Task;
+                            }
+                        }
+                        else
+                        {
+                            //dispatcher not available, try executing directly
+                            await _executeWithParamAsync.Invoke(parameter);
                         }
 #elif MAUI
                         await MainThread.InvokeOnMainThreadAsync(async () => { await _executeWithParamAsync.Invoke(parameter); });
@@ -1462,11 +1478,20 @@ public class SimpleCommand : ICommand, IDisposable
                     if (executeOnMain)
                     {
 #if (WIN_UI || HAS_UNO)
-                        var tsc = new TaskCompletionSource();
-                        var queued = _dispatcher.TryEnqueue(() => { WaitForExecute(tsc, _executeNoParamAsync); });
-                        if (queued)
+                        var dispatcher = GetDispatcher();
+                        if (dispatcher != null)
                         {
-                            await tsc.Task;
+                            var tsc = new TaskCompletionSource();
+                            var queued = dispatcher.TryEnqueue(() => { WaitForExecute(tsc, _executeNoParamAsync); });
+                            if (queued)
+                            {
+                                await tsc.Task;
+                            }
+                        }
+                        else
+                        {
+                            //dispatcher not available, try executing directly
+                            await _executeNoParamAsync.Invoke();
                         }
 #elif MAUI
                         await MainThread.InvokeOnMainThreadAsync(async () => { await _executeNoParamAsync.Invoke(); });
@@ -1483,12 +1508,52 @@ public class SimpleCommand : ICommand, IDisposable
         }
     }
 
-    // ReSharper restore AsyncVoidMethod
-
+#if MAUI
+    public async void RaiseCanExecuteChanged()
+    {
+        if (CanExecuteChanged != null)
+        {
+            if (ShouldRaiseCanExecuteOnMainThread && (!MainThread.IsMainThread))
+            {
+                await MainThread.InvokeOnMainThreadAsync(() => { CanExecuteChanged.Invoke(this, EventArgs.Empty); });
+            }
+            else
+            {
+                CanExecuteChanged.Invoke(this, EventArgs.Empty);
+            }
+        }
+    }
+#else
     public void RaiseCanExecuteChanged()
     {
-        CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        if (CanExecuteChanged != null)
+        {
+            if (ShouldRaiseCanExecuteOnMainThread)
+            {
+#if (WIN_UI || HAS_UNO)
+                var dispatcher = GetDispatcher();
+                if (dispatcher != null)
+                {
+                    dispatcher.TryEnqueue(() => { CanExecuteChanged.Invoke(this, EventArgs.Empty); });
+                }
+                else
+                {
+                    //dispatcher not available, try executing directly
+                    CanExecuteChanged.Invoke(this, EventArgs.Empty);
+                }
+#else
+                Application.Current.Dispatcher.Invoke(() => { CanExecuteChanged.Invoke(this, EventArgs.Empty); });
+#endif
+            }
+            else
+            {
+                CanExecuteChanged.Invoke(this, EventArgs.Empty);
+            }
+        }
     }
+#endif
+
+    // ReSharper restore AsyncVoidMethod
 
     public event EventHandler CanExecuteChanged;
 
@@ -1521,7 +1586,7 @@ public class SimpleCommand : ICommand, IDisposable
             _executeNoParamAsync = null;
 
 #if (WIN_UI || HAS_UNO)
-        _dispatcher = null;
+            _dispatcher = null;
 #endif
         }
     }
@@ -2923,6 +2988,9 @@ public class SimpleHttpClient : HttpClient, IDisposable
 
 public enum IdentifiedLinuxDistro
 {
+    //Note: when adding to this list, consider whether the new member(s)
+    //  also needs to be added to the DebianStyleDistros array below.
+
     Unknown = 0,
     Alpine,
     Debian,
@@ -3051,7 +3119,7 @@ public class SimpleOsInfo
 
     //The following list is from here:
     //  https://en.wikipedia.org/wiki/MacOS_version_history
-    //  This list was last retrieved and updated: 8/10/2024
+    //  This list was last retrieved and updated: 4/26/2025
     private static (int DarwinVersion, string Codename)[] MacOsCodenames { get; } =
         [
             (6, "Jaguar"),
@@ -3075,6 +3143,9 @@ public class SimpleOsInfo
             (24, "Sequoia"),
         ];
 
+    //The following list is from here:
+    //  https://en.wikipedia.org/wiki/Android_version_history
+    //  This list was last retrieved and updated: 4/26/2025
     private static Dictionary<int, (Version Version, string Codename)> AndroidCodenames { get; } = new()
     {
         { 1, new ValueTuple<Version, string>(new Version(1, 0), "Initial") },
@@ -3112,6 +3183,7 @@ public class SimpleOsInfo
         { 33, new ValueTuple<Version, string>(new Version(13, 0), "Tiramisu") },
         { 34, new ValueTuple<Version, string>(new Version(14, 0), "Upside Down Cake") },
         { 35, new ValueTuple<Version, string>(new Version(15, 0), "Vanilla Ice Cream") },
+        { 36, new ValueTuple<Version, string>(new Version(16, 0), "Baklava") },
     };
 
     private const string UnixRootUsername = "root";
@@ -3638,6 +3710,10 @@ public class SimpleOsInfo
         var major = 0;
         var minor = 0;
         var build = 0;
+
+        //Model and Manufacturer info will only be present with MAUI - not Uno - I haven't found a method
+        //  equivalent to DeviceInfo.Current for getting this information on Android running with Uno.
+
         var model = string.Empty;
         var manufacturer = string.Empty;
 
@@ -3727,6 +3803,7 @@ public class SimpleOsInfo
                 result.ProductName = $"Android {version}";
             }
 
+            //See note above - model and manufacturer only available on MAUI, not Uno
             if (string.IsNullOrWhiteSpace(model))
             {
                 result.ProductNameDisplay = result.ProductName;
