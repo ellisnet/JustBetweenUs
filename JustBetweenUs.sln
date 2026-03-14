@@ -1,15 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.8.34525.116
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{20FDBD45-4944-4EDC-9AA8-358B0D22AED7}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		Directory.Build.props = Directory.Build.props
-		Directory.Build.targets = Directory.Build.targets
-		global.json = global.json
-		solution-config.props.sample = solution-config.props.sample
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JustBetweenUs.Encryption", "JustBetweenUs.Encryption\JustBetweenUs.Encryption.csproj", "{89986B9A-A776-4805-A3EF-8C29AE69CA75}"
@@ -25,8 +21,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JustBetweenUs.Encryption.Tests", "Tests\JustBetweenUs.Encryption.Tests\JustBetweenUs.Encryption.Tests.csproj", "{B9210CF6-84A3-4D57-86B6-E4E2BD016A43}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Uno", "Uno", "{FBF5CFDF-4CAD-4170-9515-498552E44695}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JustBetweenUs.Uno", "Uno\JustBetweenUs.Uno\JustBetweenUs.Uno.csproj", "{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JustBetweenUs.WinUi", "JustBetweenUs.WinUi\JustBetweenUs.WinUi.csproj", "{7C4CEB89-1BC8-4F52-86D1-FAEE3D16C2EF}"
 EndProject
@@ -113,23 +107,6 @@ Global
 		{B9210CF6-84A3-4D57-86B6-E4E2BD016A43}.Release|x64.Build.0 = Release|Any CPU
 		{B9210CF6-84A3-4D57-86B6-E4E2BD016A43}.Release|x86.ActiveCfg = Release|Any CPU
 		{B9210CF6-84A3-4D57-86B6-E4E2BD016A43}.Release|x86.Build.0 = Release|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Debug|arm64.ActiveCfg = Debug|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Debug|arm64.Build.0 = Debug|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Debug|x64.Build.0 = Debug|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Debug|x86.Build.0 = Debug|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Release|arm64.ActiveCfg = Release|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Release|arm64.Build.0 = Release|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Release|x64.ActiveCfg = Release|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Release|x64.Build.0 = Release|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Release|x86.ActiveCfg = Release|Any CPU
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE}.Release|x86.Build.0 = Release|Any CPU
 		{7C4CEB89-1BC8-4F52-86D1-FAEE3D16C2EF}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{7C4CEB89-1BC8-4F52-86D1-FAEE3D16C2EF}.Debug|Any CPU.Build.0 = Debug|x64
 		{7C4CEB89-1BC8-4F52-86D1-FAEE3D16C2EF}.Debug|Any CPU.Deploy.0 = Debug|x64
@@ -161,7 +138,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C5CDE281-305B-468B-B2B7-5F9B4F4EEB9B} = {8D4A5825-B93B-47EA-87CB-1491D666A71C}
 		{B9210CF6-84A3-4D57-86B6-E4E2BD016A43} = {7F440D69-1FC8-4D2D-ACF1-C6CBC1454008}
-		{F1BE61C6-FD48-46DE-ADFF-09EE1DB17DAE} = {FBF5CFDF-4CAD-4170-9515-498552E44695}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A3274A4-C353-477F-BF9E-2B60BE8D44E8}

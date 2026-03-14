@@ -11,7 +11,7 @@
    limitations under the License.
 */
 
-//FILE DATE/REVISION: 2025-01-18
+//FILE DATE/REVISION: 2025-03-14
 
 using Microsoft.Extensions.Configuration; //Required NuGet: Microsoft.Extensions.Hosting
 using Microsoft.Extensions.DependencyInjection; //Required NuGet: Microsoft.Extensions.DependencyInjection
@@ -38,7 +38,8 @@ using System.Net.Http; //Required NuGet: Microsoft.Extensions.Http - IMPORTANT: 
 #if SIMPLE_OUTPUT_LOGGING
 using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
-using Xunit.Abstractions; //Required NuGet: xunit
+using System.Text;
+using Xunit; //Required NuGet: xunit.v3
 #endif
 
 // ReSharper disable CheckNamespace
@@ -296,7 +297,7 @@ public class SimpleTestFixture : IServiceProvider, ITestFixture
     public void CreateAndRegisterLogger<T>(ITestOutputHelper output,
         bool registerBasicILogger = true)
     {
-        ArgumentNullException.ThrowIfNull(output, nameof(output));
+        ArgumentNullException.ThrowIfNull(output);
 
         if (typeof(T).IsGenericType)
         {
@@ -425,6 +426,7 @@ public class SimpleOutputLoggerFactory : IOutputLoggerFactory
 public class SimpleTestOutputHelper : ITestOutputHelper
 {
     private readonly ITestOutputHelper _wrappedOutput;
+    private readonly StringBuilder _output = new();
 
     public SimpleTestOutputHelper(ITestOutputHelper wrappedOutput = null)
     {
@@ -432,50 +434,58 @@ public class SimpleTestOutputHelper : ITestOutputHelper
     }
 
     public bool AlwaysWriteToConsole { get; set; }
-    
-    public void WriteLine(string message)
+
+    private void WriteText(string text, bool withEndOfLine = false)
     {
-        if (AlwaysWriteToConsole
-            || (_wrappedOutput == null)
-            || (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))) //Need to write test output to console on Linux
+        if (text != null)
         {
-            Console.WriteLine(message);
-        }
-        else
-        {
-            try
+            if (withEndOfLine) { _output.AppendLine(text); }
+            else { _output.Append(text); }
+
+            if (AlwaysWriteToConsole
+                || (_wrappedOutput == null)
+                || (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))) //Need to write test output to console on Linux
             {
-                //Writing to ITestOutputHelper can fail if the test has already completed
-                _wrappedOutput.WriteLine(message);
+                if (withEndOfLine) { Console.WriteLine(text); }
+                else { Console.Write(text); }
             }
-            catch (Exception)
+            else
             {
-                Console.WriteLine(message);
+                try
+                {
+                    //Note: writing to ITestOutputHelper can fail if the test has already completed
+                    if (withEndOfLine) { _wrappedOutput.WriteLine(text); }
+                    else { _wrappedOutput.Write(text); }
+                }
+                catch (Exception)
+                {
+                    if (withEndOfLine) { Console.WriteLine(text); }
+                    else { Console.Write(text); }
+                }
             }
         }
     }
 
-    public void WriteLine(string format, params object[] args)
-    {
-        if (AlwaysWriteToConsole
-            || (_wrappedOutput == null)
-            || (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))) //Need to write test output to console on Linux
-        {
-            Console.WriteLine(format, args);
-        }
-        else
-        {
-            try
-            {
-                //Writing to ITestOutputHelper can fail if the test has already completed
-                _wrappedOutput.WriteLine(format, args);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine(format, args);
-            }
-        }
-    }
+    #region | ITestOutputHelper implementation |
+
+    /// <inheritdoc />
+    public string Output => _output.ToString();
+
+    /// <inheritdoc />
+    public void Write(string message) => WriteText(message);
+
+    /// <inheritdoc />
+    public void Write(string format, params object[] args) =>
+        WriteText(string.Format(format, args));
+
+    /// <inheritdoc />
+    public void WriteLine(string message) => WriteText(message, withEndOfLine: true);
+
+    /// <inheritdoc />
+    public void WriteLine(string format, params object[] args) =>
+        WriteText(string.Format(format, args), withEndOfLine: true);
+
+    #endregion
 }
 
 public class SimpleOutputLoggerScope<TState> : IDisposable
@@ -543,7 +553,7 @@ public class SimpleOutputLogger : ILogger
 
     public SimpleOutputLogger(ITestOutputHelper output, string name = null)
     {
-        ArgumentNullException.ThrowIfNull(output, nameof(output));
+        ArgumentNullException.ThrowIfNull(output);
         _writer = SimpleOutputLogWriter.GetInstance(output);
         _name = (string.IsNullOrWhiteSpace(name)) ? null : name.Trim();
     }

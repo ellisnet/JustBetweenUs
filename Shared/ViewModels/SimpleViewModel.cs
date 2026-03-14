@@ -1,5 +1,5 @@
-/*
-   Copyright 2025 Ellisnet - Jeremy Ellis (jeremy@ellisnet.com)
+﻿/*
+   Copyright 2026 Ellisnet - Jeremy Ellis (jeremy@ellisnet.com)
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -11,7 +11,7 @@
    limitations under the License.
 */
 
-//FILE DATE/REVISION: 2025-04-26
+//FILE DATE/REVISION: 2026-03-14
 
 // ReSharper disable RedundantCast
 // ReSharper disable RedundantAssignment
@@ -33,6 +33,7 @@
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable ConstantNullCoalescingCondition
 // ReSharper disable ConstantConditionalAccessQualifier
+// ReSharper disable RedundantCallerArgumentExpressionDefaultValue
 
 #pragma warning disable IDE0079
 #pragma warning disable IDE0051
@@ -68,7 +69,8 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-#if (WIN_UI || HAS_UNO) //WIN_UI needs to be manually defined on Win UI projects (and Uno net8.0-windows projects)
+
+#if (WIN_UI || HAS_UNO) //WIN_UI needs to be manually defined on Win UI projects (and Uno net10.0-windows projects)
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -84,11 +86,11 @@ using System.Windows;
 //  class library that is referenced by the WPF application - then the project must be set to use the Windows SDK for compilation,
 //  with the following in the .csproj file:
 /*
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
 */
 //Note that this also means that any projects that reference the project containing this code, must also have the TargetFramework
-//  set to 'net8.0-windows' - e.g. Tests projects that test the view models that inherit from SimpleViewModel.
+//  set to 'net10.0-windows' - e.g. Tests projects that test the view models that inherit from SimpleViewModel.
 //  (This is not relevant to WIN_UI or HAS_UNO or MAUI projects that include this file.)
 #endif
 
@@ -275,7 +277,7 @@ public class SimpleDialog : IDisposable
     {
         if (_isDisposed)
         {
-            throw new ObjectDisposedException("Dialog has been disposed.");
+            throw new ObjectDisposedException(objectName: nameof(SimpleDialog), message: "Dialog has been disposed.");
         }
 
         // ReSharper disable once JoinDeclarationAndInitializer
@@ -349,14 +351,14 @@ public class SimpleDialog : IDisposable
         {
             await MainThreadHelper.SafeInvokeOnMainThreadAsync(async () =>
             {
-                await _xamlRootGetter.Invoke().DisplayAlert((_title ?? ""), _message, firstButton);
+                await _xamlRootGetter.Invoke().DisplayAlertAsync((_title ?? ""), _message, firstButton);
             });
             result = firstButtonResult;
         }
         else
         {
             result = await MainThreadHelper.SafeInvokeOnMainThreadAsync(async () => 
-                (await _xamlRootGetter.Invoke().DisplayAlert((_title ?? ""), _message, firstButton, secondButton)) 
+                (await _xamlRootGetter.Invoke().DisplayAlertAsync((_title ?? ""), _message, firstButton, secondButton)) 
                     ? firstButtonResult 
                     : secondButtonResult);
         }
@@ -907,8 +909,8 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 
 #else
 
-    protected static Visibility GetVisibility(bool isVisible) => (isVisible) 
-        ? Visibility.Visible 
+    protected static Visibility GetVisibility(bool isVisible) => (isVisible)
+        ? Visibility.Visible
         : Visibility.Hidden;
 
     protected virtual void InvokeOnMainThread(Action functionToExecute)
@@ -973,18 +975,30 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 
     public event PropertyChangedEventHandler PropertyChanged;
 
-    protected virtual void NotifyPropertyChanged(string propertyName)
+    protected virtual void NotifyPropertyChanged(string propertyName, bool notifyOnMainThread = false)
     {
         if ((!string.IsNullOrWhiteSpace(propertyName)))
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            CheckAffectedProperties(propertyName);
-            CheckAffectedCommands(propertyName);
+            if (notifyOnMainThread)
+            {
+                InvokeOnMainThread(() =>
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                    CheckAffectedProperties(propertyName);
+                    CheckAffectedCommands(propertyName);
+                });
+            }
+            else
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                CheckAffectedProperties(propertyName);
+                CheckAffectedCommands(propertyName);
+            }
         }
     }
 
-    protected virtual void ThisPropertyChanged([CallerMemberName] string propertyName = "") =>
-        NotifyPropertyChanged(propertyName);
+    protected virtual void ThisPropertyChanged([CallerMemberName] string propertyName = "", bool notifyOnMainThread = false) =>
+        NotifyPropertyChanged(propertyName, notifyOnMainThread);
 
     protected virtual void RaiseCanExecuteChanged(SimpleCommand command) =>
         command?.RaiseCanExecuteChanged();
@@ -1055,18 +1069,20 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
         }
     }
 
-    protected virtual void SetProperty<T>(ref T property, T newValue, [CallerMemberName] string propertyName = "")
+    protected virtual void SetProperty<T>(ref T property, T newValue,
+        [CallerMemberName] string propertyName = "", bool notifyOnMainThread = false)
         where T : class
     {
         if ((property == null && newValue != null)
             || (property != null && (newValue == null || (!property.Equals(newValue)))))
         {
             property = newValue;
-            NotifyPropertyChanged(propertyName);
+            NotifyPropertyChanged(propertyName, notifyOnMainThread);
         }
     }
 
-    protected virtual void SetEnumProperty<TEnum>(ref TEnum property, TEnum newValue, [CallerMemberName] string propertyName = "")
+    protected virtual void SetEnumProperty<TEnum>(ref TEnum property, TEnum newValue,
+        [CallerMemberName] string propertyName = "", bool notifyOnMainThread = false)
         where TEnum : Enum
     {
         if (Enum.IsDefined(typeof(TEnum), property)
@@ -1074,59 +1090,75 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
             && (!property.Equals(newValue)))
         {
             property = newValue;
-            NotifyPropertyChanged(propertyName);
+            NotifyPropertyChanged(propertyName, notifyOnMainThread);
         }
     }
 
-    protected virtual void SetProperty(ref string property, string newValue, [CallerMemberName] string propertyName = "")
+    protected virtual void SetProperty(ref string property, string newValue,
+        [CallerMemberName] string propertyName = "", bool notifyOnMainThread = false)
     {
         if ((property == null && newValue != null)
             || (property != null && (newValue == null || (!property.Equals(newValue)))))
         {
             property = newValue;
-            NotifyPropertyChanged(propertyName);
+            NotifyPropertyChanged(propertyName, notifyOnMainThread);
         }
     }
 
-    protected virtual void SetProperty(ref bool property, bool newValue, [CallerMemberName] string propertyName = "")
+    protected virtual void SetProperty(ref bool property, bool newValue,
+        [CallerMemberName] string propertyName = "", bool notifyOnMainThread = false)
     {
         if (!property.Equals(newValue))
         {
             property = newValue;
-            NotifyPropertyChanged(propertyName);
+            NotifyPropertyChanged(propertyName, notifyOnMainThread);
         }
     }
 
-    protected virtual void SetProperty(ref DateTime property, DateTime newValue, [CallerMemberName] string propertyName = "")
+    protected virtual void SetProperty(ref DateTime property, DateTime newValue,
+        [CallerMemberName] string propertyName = "", bool notifyOnMainThread = false)
     {
         if (!property.Equals(newValue))
         {
             property = newValue;
-            NotifyPropertyChanged(propertyName);
+            NotifyPropertyChanged(propertyName, notifyOnMainThread);
         }
     }
 
-    protected virtual void SetProperty(ref DateTimeOffset property, DateTimeOffset newValue, [CallerMemberName] string propertyName = "")
+    protected virtual void SetProperty(ref DateTimeOffset property, DateTimeOffset newValue,
+        [CallerMemberName] string propertyName = "", bool notifyOnMainThread = false)
     {
         if (!property.Equals(newValue))
         {
             property = newValue;
-            NotifyPropertyChanged(propertyName);
+            NotifyPropertyChanged(propertyName, notifyOnMainThread);
         }
     }
 
-    protected virtual void SetProperty(ref int property, int newValue, [CallerMemberName] string propertyName = "")
+    protected virtual void SetProperty(ref int property, int newValue,
+        [CallerMemberName] string propertyName = "", bool notifyOnMainThread = false)
     {
         if (!property.Equals(newValue))
         {
             property = newValue;
-            NotifyPropertyChanged(propertyName);
+            NotifyPropertyChanged(propertyName, notifyOnMainThread);
         }
     }
 
     #endregion
 
     #region | IDisposable implementation |
+
+    protected virtual void CheckDisposed(Func<bool> disposedChecker, [CallerMemberName] string caller = null)
+    {
+        if (disposedChecker?.Invoke() ?? false)
+        {
+            throw new ObjectDisposedException(objectName: GetType().Name,
+                message: (string.IsNullOrWhiteSpace(caller))
+                ? $"This {GetType().Name} instance has been disposed."
+                : $"Cannot call {caller.Trim()} on a {GetType().Name} instance that has been disposed.");
+        }
+    }
 
     public virtual void Dispose()
     {
@@ -1660,7 +1692,7 @@ public static class SimpleEnumHelper
 {
     // ReSharper disable InconsistentNaming
 
-    private static readonly object Locker = new();
+    private static readonly Lock Locker = new();
 
     //Item1 = the Enum type
     private static readonly Dictionary<Type, Dictionary<string, object>> EnumDictionary = [];
@@ -1795,7 +1827,7 @@ public static class SimpleEnumHelper
         {
             var infoType = typeof(TInfo);
 
-            if (CheckDictionaries(infoType: infoType) 
+            if (CheckDictionaries(infoType: infoType)
                 && InfoDictionary.TryGetValue(infoType, out var dictionary))
             {
                 if (dictionary.Any(a => a.Key.Equals(memberName.Trim(),
@@ -1824,7 +1856,7 @@ public static class SimpleEnumHelper
         {
             var infoType = typeof(TInfo);
 
-            if (CheckDictionaries(infoType: infoType) 
+            if (CheckDictionaries(infoType: infoType)
                 && InfoDictionary.TryGetValue(infoType, out var dictionary))
             {
                 if (dictionary.Any(a => a.Key.Equals(member.ToString(),
@@ -1876,13 +1908,28 @@ public static class SimpleEnumHelper
 
         return result;
     }
+
+    public static IList<TInfo> GetPossibleValues<TEnum, TInfo>()
+        where TInfo : class, ISimpleEnumInfo
+        where TEnum : Enum =>
+        GetInfoDictionary<TEnum, TInfo>()
+            .Select(s => s.Value)
+            .Where(w => w != null)
+            .Distinct()
+            .ToArray();
 }
 
 #endif
 
 #if RESOLVE_SERVICES
 
-public class SimpleServiceResolver
+public interface ISimpleServiceResolver : IServiceProvider
+{
+    T GetService<T>() where T : class;
+    IEnumerable<T> GetServices<T>() where T : class;
+}
+
+public class SimpleServiceResolver : ISimpleServiceResolver
 {
     private readonly IHost _host;
 
@@ -1927,6 +1974,13 @@ public class SimpleServiceResolver
             {
                 configureServices.Invoke(services);
 
+                if (!services.IsRegistered<ISimpleServiceResolver>())
+                {
+                    services.AddSingleton<ISimpleServiceResolver>((svc) => this);
+                }
+
+                services.AutoRegisterServices([Assembly.GetExecutingAssembly()]);
+
 #if SIMPLE_MESSAGING
                 services.AddSimpleMessaging();
 #endif
@@ -1952,12 +2006,67 @@ public class SimpleServiceResolver
         _host.Dispose();
     }
 
+    #region | ISimpleServiceResolver implementation |
+
+    /// <inheritdoc />
+    public object GetService(Type serviceType) => _host.Services.GetService(serviceType);
+
+    /// <inheritdoc />
     public T GetService<T>() where T : class => _host.Services.GetRequiredService<T>();
+
+    /// <inheritdoc />
     public IEnumerable<T> GetServices<T>() where T : class => _host.Services.GetServices<T>();
+
+    #endregion
+}
+
+public interface IAutoRegisterServices
+{
+    void RegisterServices(IServiceCollection services);
 }
 
 public static class SimpleServiceExtensions
 {
+    public static bool IsRegistered(this IServiceCollection services, Type serviceType) =>
+        (services != null && serviceType != null)
+        && services.Any(a => serviceType.IsAssignableFrom(a.ServiceType));
+
+    public static bool IsRegistered<TService>(this IServiceCollection services) =>
+        IsRegistered(services, typeof(TService));
+
+    public static IServiceCollection AutoRegisterServices(this IServiceCollection services, IList<Assembly> fromAssemblies)
+    {
+        if (services != null && fromAssemblies != null)
+        {
+            foreach (var assembly in fromAssemblies.Distinct())
+            {
+                foreach (var registerType in assembly.GetTypes()
+                             .Where(w => w.IsAssignableTo(typeof(IAutoRegisterServices))))
+                {
+                    //needs an empty constructor
+                    if (registerType.GetConstructor(Type.EmptyTypes) != null)
+                    {
+                        try
+                        {
+                            ((IAutoRegisterServices)Activator.CreateInstance(registerType))!.RegisterServices(services);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new TypeLoadException(
+                                $"Error while calling {nameof(IAutoRegisterServices.RegisterServices)}()"
+                                + $" on type: {registerType.Namespace}.{registerType.Name}"
+                                , e);
+                        }
+                    }
+                }
+            }
+        }
+
+        return services;
+    }
+
+    public static IServiceCollection AutoRegisterServices(this IServiceCollection services, IList<Type> fromAssembliesContainingTypes) =>
+        AutoRegisterServices(services, fromAssembliesContainingTypes?.Select(s => s.Assembly).ToList());
 
 #if SIMPLE_MESSAGING
     public static IServiceCollection AddSimpleMessaging(this IServiceCollection services)
@@ -2049,7 +2158,7 @@ public class SimpleMessaging : ISimpleMessaging
 #if RESOLVE_SERVICES
     public static void ConfigureServices(IServiceCollection services)
     {
-        if (services?.All(a => !typeof(ISimpleMessaging).IsAssignableFrom(a.ServiceType)) ?? false)
+        if (services != null && (!services.IsRegistered<ISimpleMessaging>()))
         {
             services.AddSingleton(Instance);
         }
@@ -2158,7 +2267,7 @@ public class SimpleMessaging : ISimpleMessaging
             {
                 if (SyncMethod.IsStatic)
                 {
-                    SyncMethod.Invoke(null, 
+                    SyncMethod.Invoke(null,
                         (SyncMethod.GetParameters().Length == 1)
                             ? [sender ?? args]
                             : [sender, args]);
@@ -2169,7 +2278,7 @@ public class SimpleMessaging : ISimpleMessaging
 
                 if (target == null) { return; }
 
-                SyncMethod.Invoke(target, 
+                SyncMethod.Invoke(target,
                     (SyncMethod.GetParameters().Length == 1)
                         ? [sender ?? args]
                         : [sender, args]);
@@ -2199,7 +2308,7 @@ public class SimpleMessaging : ISimpleMessaging
     }
 
     private readonly Dictionary<Sender, List<Subscription>> _subscriptions = [];
-    private readonly object _subscriptionLocker = new();
+    private readonly Lock _subscriptionLocker = new();
 
     private void InnerSend(
         string message,
@@ -2542,13 +2651,13 @@ public class SimpleHttpClientFactory : ISimpleHttpClientFactory
     {
         if (services != null)
         {
-            if (services.All(a => !typeof(IHttpClientFactory).IsAssignableFrom(a.ServiceType)))
+            if (!services.IsRegistered<IHttpClientFactory>())
             {
                 var factory = new SimpleHttpClientFactory();
                 services.AddSingleton<IHttpClientFactory>(factory);
                 services.AddSingleton<ISimpleHttpClientFactory>(factory);
             }
-            else if (services.All(a => !typeof(ISimpleHttpClientFactory).IsAssignableFrom(a.ServiceType)))
+            else if (!services.IsRegistered<ISimpleHttpClientFactory>())
             {
                 var factory = new SimpleHttpClientFactory();
                 services.AddSingleton<ISimpleHttpClientFactory>(factory);
@@ -2841,8 +2950,9 @@ public class SimpleHttpClient : HttpClient, IDisposable
     {
         if (_isDisposed)
         {
-            throw new ObjectDisposedException((string.IsNullOrWhiteSpace(caller))
-                ? $"{nameof(SimpleHttpClient)} instance has been disposed."
+            throw new ObjectDisposedException(objectName: nameof(SimpleHttpClient), 
+              message: (string.IsNullOrWhiteSpace(caller))
+                ? $"This {nameof(SimpleHttpClient)} instance has been disposed."
                 : $"Cannot call {caller.Trim()} on a {nameof(SimpleHttpClient)} instance that has been disposed.");
         }
     }
@@ -3008,7 +3118,7 @@ public class RunUnixShellCommandResult
     {
         IsComplete = isComplete;
     }
-    
+
     public string Output { get; set; }
     public string Error { get; set; }
     public Exception Exception { get; set; }
@@ -3111,9 +3221,9 @@ public class SimpleOsInfo
 
     private static IdentifiedLinuxDistro[] DebianStyleDistros { get; } =
     [
-        IdentifiedLinuxDistro.Debian, 
+        IdentifiedLinuxDistro.Debian,
         IdentifiedLinuxDistro.LMDE,
-        IdentifiedLinuxDistro.Mint, 
+        IdentifiedLinuxDistro.Mint,
         IdentifiedLinuxDistro.Ubuntu
     ];
 
@@ -3215,7 +3325,7 @@ public class SimpleOsInfo
         if (!string.IsNullOrWhiteSpace(versionText))
         {
             var versionParts = versionText.Trim().Split('.');
-            
+
             if (versionParts.Length > 0 && int.TryParse(versionParts[0], out var major))
             {
                 majorVersion = major;
@@ -3227,7 +3337,7 @@ public class SimpleOsInfo
                     if (versionParts.Length > 2 && int.TryParse(versionParts[2], out var build))
                     {
                         buildVersion = build;
-                            
+
                         if (versionParts.Length > 3 && int.TryParse(versionParts[3], out var revision))
                         {
                             revisionVersion = revision;
@@ -3239,7 +3349,7 @@ public class SimpleOsInfo
 
         return (majorVersion, minorVersion, buildVersion, revisionVersion);
     }
-    
+
     private static Dictionary<string, string> GetInfoDictionary(IList<string> infoLines, char assignmentChar)
     {
         var result = new Dictionary<string, string>();
@@ -3268,12 +3378,12 @@ public class SimpleOsInfo
 
         return result;
     }
-    
+
     private async Task<OsVersionInfo> GetDebianVersionInfo(IdentifiedLinuxDistro distro,
         bool withConsoleOutput = false)
     {
         OsVersionInfo result = null;
-        
+
         if (IsLinux && distro == IdentifiedLinuxDistro.Debian)
         {
             result = new OsVersionInfo();
@@ -3281,13 +3391,13 @@ public class SimpleOsInfo
             do
             {
                 #region | Get the best possible version info |
-                
+
                 var shellResult = await RunUnixShellCommand(LinuxListTextFileCommand, DebianVersionArgs,
                     showOutput: withConsoleOutput);
                 if (shellResult.IsError || (!shellResult.IsComplete) || shellResult.IsEmptyOutput) { break; }
 
                 var version = shellResult.OutputLines[0].Trim().Split(' ').FirstOrDefault();
-                if (string.IsNullOrWhiteSpace(version)) {break;}
+                if (string.IsNullOrWhiteSpace(version)) { break; }
 
                 result.VersionNumber = version;
 
@@ -3296,17 +3406,17 @@ public class SimpleOsInfo
                 result.MinorVersion = minorVersion;
                 result.BuildVersion = buildVersion;
                 result.RevisionVersion = revisionVersion;
-                
+
                 #endregion
 
                 #region | Get the os version codename and product name |
-                
+
                 shellResult = await RunUnixShellCommand(LinuxListTextFileCommand, LinuxOsReleaseDetailsArgs,
                     showOutput: withConsoleOutput);
                 if (shellResult.IsError || (!shellResult.IsComplete) || shellResult.IsEmptyOutput) { break; }
 
                 var infoDictionary = GetInfoDictionary(shellResult.OutputLines, '=');
-                
+
                 if (infoDictionary is not { Count: > 0 }) { break; }
 
                 if (infoDictionary.TryGetValue("VERSION_CODENAME", out var codename)
@@ -3328,7 +3438,7 @@ public class SimpleOsInfo
                 }
 
                 #endregion
-                
+
             } while (false);
         }
 
@@ -3340,7 +3450,7 @@ public class SimpleOsInfo
     {
         if (IsLinux && DebianStyleDistros.Contains(distro))
         {
-            var shellResult = await RunUnixShellCommand(UnixUsernameCommand, 
+            var shellResult = await RunUnixShellCommand(UnixUsernameCommand,
                 showOutput: withConsoleOutput);
             if (shellResult.IsComplete && (!shellResult.IsError) && (!shellResult.IsEmptyOutput))
             {
@@ -3354,7 +3464,7 @@ public class SimpleOsInfo
         bool withConsoleOutput = false)
     {
         OsVersionInfo result = null;
-        
+
         if (IsLinux && distro == IdentifiedLinuxDistro.Ubuntu)
         {
             result = new OsVersionInfo();
@@ -3362,13 +3472,13 @@ public class SimpleOsInfo
             do
             {
                 #region | Get the os version, codename and product name |
-                
+
                 var shellResult = await RunUnixShellCommand(LinuxListTextFileCommand, LinuxOsReleaseDetailsArgs,
                     showOutput: withConsoleOutput);
                 if (shellResult.IsError || (!shellResult.IsComplete) || shellResult.IsEmptyOutput) { break; }
 
                 var infoDictionary = GetInfoDictionary(shellResult.OutputLines, '=');
-                
+
                 if (infoDictionary is not { Count: > 0 }) { break; }
 
                 if (infoDictionary.TryGetValue("VERSION", out var version)
@@ -3384,14 +3494,14 @@ public class SimpleOsInfo
 
                     result.IsLongTermSupported =
                         versionTextParts.Any(a => a.Equals("LTS", StringComparison.InvariantCultureIgnoreCase));
-                    
+
                     var (majorVersion, minorVersion, buildVersion, revisionVersion) = GetVersionParts(versionTextParts[0]);
                     result.MajorVersion = majorVersion;
                     result.MinorVersion = minorVersion;
                     result.BuildVersion = buildVersion;
                     result.RevisionVersion = revisionVersion;
                 }
-                
+
                 if (infoDictionary.TryGetValue("VERSION_CODENAME", out var codename)
                     && (!string.IsNullOrWhiteSpace(codename)))
                 {
@@ -3411,10 +3521,10 @@ public class SimpleOsInfo
                 }
 
                 #endregion
-                
+
                 #region | Get the BasedOnVersion info |
-                
-                shellResult = await RunUnixShellCommand(LinuxListTextFileCommand, DebianVersionArgs, 
+
+                shellResult = await RunUnixShellCommand(LinuxListTextFileCommand, DebianVersionArgs,
                     showOutput: withConsoleOutput);
                 if (shellResult.IsError || (!shellResult.IsComplete) || shellResult.IsEmptyOutput) { break; }
 
@@ -3426,12 +3536,12 @@ public class SimpleOsInfo
 
         return result;
     }
-    
+
     private async Task<OsVersionInfo> GetMintVersionInfo(IdentifiedLinuxDistro distro,
         bool withConsoleOutput = false)
     {
         OsVersionInfo result = null;
-        
+
         if (IsLinux && distro is IdentifiedLinuxDistro.Mint or IdentifiedLinuxDistro.LMDE)
         {
             result = new OsVersionInfo();
@@ -3439,13 +3549,13 @@ public class SimpleOsInfo
             do
             {
                 #region | Get the os version, codename and product name |
-                
+
                 var shellResult = await RunUnixShellCommand(LinuxListTextFileCommand, LinuxOsReleaseDetailsArgs,
                     showOutput: withConsoleOutput);
                 if (shellResult.IsError || (!shellResult.IsComplete) || shellResult.IsEmptyOutput) { break; }
 
                 var infoDictionary = GetInfoDictionary(shellResult.OutputLines, '=');
-                
+
                 if (infoDictionary is not { Count: > 0 }) { break; }
 
                 if (infoDictionary.TryGetValue("VERSION", out var version)
@@ -3461,14 +3571,14 @@ public class SimpleOsInfo
 
                     result.IsLongTermSupported =
                         versionTextParts.Any(a => a.Equals("LTS", StringComparison.InvariantCultureIgnoreCase));
-                    
+
                     var (majorVersion, minorVersion, buildVersion, revisionVersion) = GetVersionParts(versionTextParts[0]);
                     result.MajorVersion = majorVersion;
                     result.MinorVersion = minorVersion;
                     result.BuildVersion = buildVersion;
                     result.RevisionVersion = revisionVersion;
                 }
-                
+
                 if (infoDictionary.TryGetValue("VERSION_CODENAME", out var codename)
                     && (!string.IsNullOrWhiteSpace(codename)))
                 {
@@ -3488,10 +3598,10 @@ public class SimpleOsInfo
                 }
 
                 #endregion
-                
+
                 #region | Get the BasedOnVersion info |
-                
-                shellResult = await RunUnixShellCommand(LinuxListTextFileCommand, DebianVersionArgs, 
+
+                shellResult = await RunUnixShellCommand(LinuxListTextFileCommand, DebianVersionArgs,
                     showOutput: withConsoleOutput);
                 if (shellResult.IsError || (!shellResult.IsComplete) || shellResult.IsEmptyOutput) { break; }
 
@@ -3503,7 +3613,7 @@ public class SimpleOsInfo
 
         return result;
     }
-        
+
     private async Task<OsVersionInfo> GetWindowsVersionInfo(bool withConsoleOutput = false)
     {
         OsVersionInfo result = null;
@@ -3522,7 +3632,7 @@ public class SimpleOsInfo
                 Console.WriteLine($"Build: {version.Build}");
                 Console.WriteLine($"Revision: {version.Revision}");
             }
-            
+
             result.VersionNumber = version.ToString();
             result.MajorVersion = version.Major;
             result.MinorVersion = version.Minor;
@@ -3530,7 +3640,7 @@ public class SimpleOsInfo
             result.RevisionVersion = version.Revision;
 
             var winVersion = result.MajorVersion;
-            
+
             //refer to: https://stackoverflow.com/questions/69038560/detect-windows-11-with-net-framework-or-windows-api
             if (winVersion == 10 && result.MinorVersion >= 0 && result.BuildVersion >= 22000)
             {
@@ -3578,7 +3688,7 @@ public class SimpleOsInfo
                         }
                     }
                 }
-                
+
                 if (!string.IsNullOrWhiteSpace(identity.Name))
                 {
                     RunningAsUser = identity.Name.Trim();
@@ -3613,12 +3723,12 @@ public class SimpleOsInfo
 
             do
             {
-                var shellResult = await RunUnixShellCommand(MacOsInfoCommand, MacOsInfoCommandArgs, 
+                var shellResult = await RunUnixShellCommand(MacOsInfoCommand, MacOsInfoCommandArgs,
                     showOutput: withConsoleOutput);
                 if (shellResult.IsError || (!shellResult.IsComplete) || shellResult.IsEmptyOutput) { break; }
 
                 var infoDictionary = GetInfoDictionary(shellResult.OutputLines, ':');
-                
+
                 if (infoDictionary.TryGetValue("System Version", out var sysVersion)
                     && (!string.IsNullOrWhiteSpace(sysVersion)))
                 {
@@ -3636,20 +3746,20 @@ public class SimpleOsInfo
                             result.MinorVersion = versionParts.MinorVersion;
                             result.BuildVersion = versionParts.BuildVersion;
                             result.RevisionVersion = versionParts.RevisionVersion;
-                            
+
                             result.VersionNumber = $"macOS {part.Trim()}";
-                            
+
                             break;
                         }
                     }
-                }                
-                
+                }
+
                 if (infoDictionary.TryGetValue("Kernel Version", out var basedOn)
                     && (!string.IsNullOrWhiteSpace(basedOn)))
                 {
                     result.BasedOnVersion = basedOn.Trim();
 
-                    var (majorVersion, _, _, _) = 
+                    var (majorVersion, _, _, _) =
                         GetVersionParts(basedOn.Replace("darwin", "", StringComparison.InvariantCultureIgnoreCase));
                     if (majorVersion > 0)
                     {
@@ -3674,12 +3784,12 @@ public class SimpleOsInfo
 
         return result;
     }
-    
+
     private async Task GetMacOsUserInfo(bool withConsoleOutput = false)
     {
         if (IsMacOs)
         {
-            var shellResult = await RunUnixShellCommand(UnixUsernameCommand, 
+            var shellResult = await RunUnixShellCommand(UnixUsernameCommand,
                 showOutput: withConsoleOutput);
             if (shellResult.IsComplete && (!shellResult.IsError) && (!shellResult.IsEmptyOutput))
             {
@@ -3837,10 +3947,10 @@ public class SimpleOsInfo
     public bool IsArm64 => RuntimeInformation.OSArchitecture == Architecture.Arm64;
 
     public string OsDescription => RuntimeInformation.OSDescription;
-    
+
     public IdentifiedLinuxDistro LinuxDistro { get; private set; } = IdentifiedLinuxDistro.Unknown;
     public OsVersionInfo OsVersionInfo { get; private set; }
-    
+
     public string RunningAsUser { get; private set; }
     public bool? IsAdminUser { get; private set; }
 
@@ -3861,7 +3971,7 @@ public class SimpleOsInfo
             : (!string.IsNullOrWhiteSpace(OsVersionInfo?.ProductName))
                 ? OsVersionInfo.ProductName.Trim()
                 : string.Empty;
-    
+
     public string LinuxDistroName => (IsLinux)
         ? LinuxDistro.ToString()
         : string.Empty;
@@ -3873,7 +3983,7 @@ public class SimpleOsInfo
             : (IsAndroid)
                 ? "Android"
                 : (IsLinux)
-                    ? $"Linux ({((LinuxDistro == IdentifiedLinuxDistro.Unknown) ? "unidentified distro" :  LinuxDistro.ToString())})"
+                    ? $"Linux ({((LinuxDistro == IdentifiedLinuxDistro.Unknown) ? "unidentified distro" : LinuxDistro.ToString())})"
                     : "Unknown";
 
     public string DotNetVersion => RuntimeEnvironment.GetSystemVersion();
@@ -3932,17 +4042,17 @@ public class SimpleOsInfo
                     case IdentifiedLinuxDistro.Alpine:
                         //TODO: Add Alpine support
                         break;
-                    
+
                     case IdentifiedLinuxDistro.Debian:
                         OsVersionInfo = await GetDebianVersionInfo(LinuxDistro, withConsoleOutput);
                         await GetDebianUserInfo(LinuxDistro, withConsoleOutput);
                         break;
-                    
+
                     case IdentifiedLinuxDistro.Ubuntu:
                         OsVersionInfo = await GetUbuntuVersionInfo(LinuxDistro, withConsoleOutput);
                         await GetDebianUserInfo(LinuxDistro, withConsoleOutput);
                         break;
-                    
+
                     case IdentifiedLinuxDistro.Mint:
                     case IdentifiedLinuxDistro.LMDE:
                         OsVersionInfo = await GetMintVersionInfo(LinuxDistro, withConsoleOutput);
@@ -4046,7 +4156,7 @@ public class SimpleOsInfo
                     await process.WaitForExitAsync();
 
                     var doDone = false;
-                    
+
                     if (showOutput && (!string.IsNullOrWhiteSpace(output)))
                     {
                         var lines = output.Split(UnixLineSplitters, StringSplitOptions.RemoveEmptyEntries);
@@ -4066,7 +4176,7 @@ public class SimpleOsInfo
                         foreach (var line in lines)
                         {
                             Console.WriteLine(line);
-                            if (ignoreWarnings 
+                            if (ignoreWarnings
                                 && (!line.Trim().StartsWith("warning", StringComparison.InvariantCultureIgnoreCase)))
                             {
                                 removeWarnings.Add(line);
@@ -4086,7 +4196,7 @@ public class SimpleOsInfo
                     {
                         Console.WriteLine("====DONE====");
                     }
-                    
+
                     // ReSharper disable once ConstantNullCoalescingCondition
                     taskResult.Output = output ?? string.Empty;
 

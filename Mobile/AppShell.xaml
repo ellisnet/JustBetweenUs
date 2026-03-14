@@ -5,8 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:JustBetweenUs.Mobile"
     xmlns:vw="using:JustBetweenUs.Views"
-    Shell.FlyoutBehavior="Disabled"
     Title="JBU">
+    <!--Shell.FlyoutBehavior="Disabled"-->
 
     <ShellContent
         Title="Home"

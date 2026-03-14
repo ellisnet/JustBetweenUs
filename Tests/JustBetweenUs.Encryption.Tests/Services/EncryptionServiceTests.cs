@@ -1,9 +1,8 @@
-﻿using FluentAssertions;
+﻿using SilverAssertions;
 using JustBetweenUs.Encryption.Services;
 using System;
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace JustBetweenUs.Encryption.Tests.Services;
 
