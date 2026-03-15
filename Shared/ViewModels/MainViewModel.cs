@@ -14,6 +14,9 @@ public interface ICopyToClipboard
     Action<string> CopyTextToClipboard { get; set; }
 }
 
+#if HAS_UNO
+[Microsoft.UI.Xaml.Data.Bindable]
+#endif
 public class MainViewModel : SimpleViewModel, ICopyToClipboard
 {
     private IEncryptionService _encryptSvc;

@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+
+    <!-- Match the namespace used by the app code -->
+    <RootNamespace>JustBetweenUs</RootNamespace>
+
+    <!-- Uno needs this define for its internal conditional compilation -->
+    <DefineConstants>$(DefineConstants);HAS_UNO;HAS_UNO_WINUI;RESOLVE_SERVICES;SIMPLE_ENUM;SIMPLE_MESSAGING</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Shared\ViewModels\EncryptionMode.cs" Link="ViewModels\EncryptionMode.cs" />
+    <Compile Include="..\..\Shared\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
+    <Compile Include="..\..\Shared\ViewModels\SimpleViewModel.cs" Link="ViewModels\SimpleViewModel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
+    <PackageReference Include="Uno.WinUI" Version="6.5.153" />
+    <PackageReference Include="Uno.WinUI.Graphics2DSK" Version="6.5.153" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.5" />
+    <PackageReference Include="Uno.UI.Adapter.Microsoft.Extensions.Logging" Version="6.5.153" />
+    <!-- Lottie/Skottie animation support -->
+    <PackageReference Include="Uno.WinUI.Lottie" Version="6.5.153" />
+    <PackageReference Include="SkiaSharp.Skottie" Version="3.119.2" />
+    <PackageReference Include="SkiaSharp.Views.Uno.WinUI" Version="3.119.2" />
+    <!-- Bundled Open Sans font -->
+    <PackageReference Include="Uno.Fonts.OpenSans" Version="2.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ViewModels\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\JustBetweenUs.Encryption\JustBetweenUs.Encryption.csproj" />
+  </ItemGroup>
+</Project>
