@@ -74,6 +74,10 @@ And added the following <windowRules> section:
 Then I had to run: killall -SIGHUP labwc
 ...in order to reload.
 Then, in subsequent runs, my app window did have a border.
+
+It might have been better to add (instead):
+<windowRule identifier="JustBetweenUs*" serverDecoration="yes" />
+...so I wasn't changing any global behavior, but I didn't try that.
 */
 
 namespace JustBetweenUs;
