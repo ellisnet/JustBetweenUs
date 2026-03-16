@@ -55,6 +55,27 @@ The repository maintainers have recently been actively merging pull requests to 
   package should correctly link these native libraries out of the box.
 */
 
+/*
+Second Raspberry Pi problem:
+I was able to get the app to run on Raspberry Pi OS (64-bit) based on Debian Trixie 13,
+but the app was appearing with borderless window, so it could not be resized and there
+was no close (X) button - to exit out of the app.
+This was fixed by a configuration change in my Raspberry Pi configuration:
+I edited the file at: ~/.config/labwc/rc.xml
+And added the following <windowRules> section:
+<openbox_config>
+  <!-- ...existing config... -->
+
+  <windowRules>
+    <windowRule identifier="*" serverDecoration="yes" />
+  </windowRules>
+</openbox_config>
+
+Then I had to run: killall -SIGHUP labwc
+...in order to reload.
+Then, in subsequent runs, my app window did have a border.
+*/
+
 namespace JustBetweenUs;
 
 internal class Program

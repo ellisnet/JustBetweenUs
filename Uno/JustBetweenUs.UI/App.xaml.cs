@@ -29,8 +29,11 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        MainWindow = new Window();
-
+        MainWindow = new Window
+        {
+            Title = "Just Between Us"
+        };
+        
         if (MainWindow.Content is not Frame rootFrame)
         {
             rootFrame = new Frame();
