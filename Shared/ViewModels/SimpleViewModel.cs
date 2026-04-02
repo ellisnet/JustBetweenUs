@@ -11,7 +11,7 @@
    limitations under the License.
 */
 
-//FILE DATE/REVISION: 2026-03-14
+//FILE DATE/REVISION: 2026-03-28
 
 // ReSharper disable RedundantCast
 // ReSharper disable RedundantAssignment
@@ -3229,7 +3229,7 @@ public class SimpleOsInfo
 
     //The following list is from here:
     //  https://en.wikipedia.org/wiki/MacOS_version_history
-    //  This list was last retrieved and updated: 4/26/2025
+    //  This list was last retrieved and updated: 3/28/2026
     private static (int DarwinVersion, string Codename)[] MacOsCodenames { get; } =
         [
             (6, "Jaguar"),
@@ -3251,11 +3251,12 @@ public class SimpleOsInfo
             (22, "Ventura"),
             (23, "Sonoma"),
             (24, "Sequoia"),
+            (25, "Tahoe"),
         ];
 
     //The following list is from here:
     //  https://en.wikipedia.org/wiki/Android_version_history
-    //  This list was last retrieved and updated: 4/26/2025
+    //  This list was last retrieved and updated: 3/28/2026
     private static Dictionary<int, (Version Version, string Codename)> AndroidCodenames { get; } = new()
     {
         { 1, new ValueTuple<Version, string>(new Version(1, 0), "Initial") },
@@ -3294,6 +3295,7 @@ public class SimpleOsInfo
         { 34, new ValueTuple<Version, string>(new Version(14, 0), "Upside Down Cake") },
         { 35, new ValueTuple<Version, string>(new Version(15, 0), "Vanilla Ice Cream") },
         { 36, new ValueTuple<Version, string>(new Version(16, 0), "Baklava") },
+        { 37, new ValueTuple<Version, string>(new Version(17, 0), "Cinnamon Bun") },
     };
 
     private const string UnixRootUsername = "root";
