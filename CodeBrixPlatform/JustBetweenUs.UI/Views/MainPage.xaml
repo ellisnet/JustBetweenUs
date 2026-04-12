@@ -5,8 +5,8 @@
       xmlns:vm="using:JustBetweenUs.ViewModels"
       xmlns:controls="using:JustBetweenUs.Controls"
       xmlns:lottie="using:CommunityToolkit.WinUI.Lottie"
-      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-    <!--FontFamily="Open Sans"-->
+      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+      FontFamily="{StaticResource OpenSansFont}">
     <!--TODO: I don't think I need this - xmlns:winui="using:Microsoft.UI.Xaml.Controls" - but still need to check other platforms-->
 
     <Page.DataContext>
