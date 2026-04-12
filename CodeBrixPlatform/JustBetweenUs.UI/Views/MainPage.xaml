@@ -17,13 +17,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="60" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="60" />
+            <RowDefinition Height="100" />
             <RowDefinition Height="*" />
             <RowDefinition Height="60" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="40" />
+            <ColumnDefinition Width="100" />
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
@@ -41,15 +41,15 @@
                      VerticalAlignment="Center" VerticalContentAlignment="Center"
                      Text="{Binding EncryptionKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
 
-            <!--TODO: I don't think I need: winui:AnimatedVisualPlayer - but still need to check all platforms-->
-            <AnimatedVisualPlayer Margin="60,0,0,0"
+            <!--Sample markup for showing a Lottie animation in this view
+                - note that Visual Studio won't like 'embedded:' and the path, but it will still work-->
+            <!--<AnimatedVisualPlayer
                                   AutoPlay="True"
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
                                   Height="60" Width="60">
-                <!--NOTE: Visual Studio doesn't recognize 'embedded:' and the path below, but they are correct and will work fine-->
                 <lottie:LottieVisualSource UriSource="embedded://JustBetweenUs.Core/JustBetweenUs.Assets.star_icon.json" />
-            </AnimatedVisualPlayer>
+            </AnimatedVisualPlayer>-->
 
         </StackPanel>
 
@@ -64,26 +64,24 @@
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center">
 
-            <Button Margin="0,0,20,0" Width="140" Height="50" 
-                    VerticalAlignment="Center" HorizontalAlignment="Right"
-                    Command="{Binding EncryptCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="16">
-                    <controls:EmbeddedImage 
-                        UriSource="embedded://JustBetweenUs.Core/JustBetweenUs.Assets.padlock-icon.svg" />
-                    <TextBlock Text="Encrypt" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
-            <!--Width="20" Height="20"-->
+            <controls:EmbeddedImageButton Margin="0,0,20,0" Width="140" Height="90"
+                VerticalAlignment="Center" HorizontalAlignment="Right"
+                Background="#FFB85555"
+                Command="{Binding EncryptCommand}"
+                ImageUriSource="embedded://JustBetweenUs.Core/JustBetweenUs.Assets.padlock-icon.svg"
+                Text="Encrypt" ImageWidth="40" ImageHeight="40" Spacing="6" ImagePosition="Top" />
 
-            <Button Margin="20,0,0,0" Width="140" Height="50" 
-              VerticalAlignment="Center" HorizontalAlignment="Left"
-              Command="{Binding DecryptCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <controls:EmbeddedImage Width="20" Height="20"
-                        UriSource="embedded://JustBetweenUs.Core/JustBetweenUs.Assets.unlocked-icon.svg" />
-                    <TextBlock Text="Decrypt" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
+            <controls:EmbeddedImageButton Margin="20,0,0,0" Width="140" Height="90"
+                VerticalAlignment="Center" HorizontalAlignment="Left"
+                Background="#FFB85555"
+                Command="{Binding DecryptCommand}"
+                ImageUriSource="embedded://JustBetweenUs.Core/JustBetweenUs.Assets.unlocked-icon.svg"
+                Text="Decrypt" ImageWidth="40" ImageHeight="40" Spacing="6" ImagePosition="Top" />
+
+            <!--Example of using EmbeddedImage standalone (not inside a button)-->
+            <!--<controls:EmbeddedImage Margin="20,0,0,0" Width="60" Height="60"
+                VerticalAlignment="Center"
+                UriSource="embedded://JustBetweenUs.Core/JustBetweenUs.Assets.padlock-icon.svg" />-->
 
         </StackPanel>
 
@@ -93,19 +91,28 @@
                Text="{Binding ProcessedText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
         </ScrollViewer>
 
-        <Button Grid.Row="4" Grid.Column="0" Width="220" Height="50" 
+        <controls:EmbeddedImageButton Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Width="220" Height="50"
             VerticalAlignment="Center" HorizontalAlignment="Center"
-            Command="{Binding CopyToClipboardCommand}">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <controls:EmbeddedImage Width="16" Height="16"
-                    UriSource="embedded://JustBetweenUs.Core/JustBetweenUs.Assets.clipboard.svg" />
-                <TextBlock Text="Copy to Clipboard" VerticalAlignment="Center" />
+            Background="#FFB85555"
+            Command="{Binding CopyToClipboardCommand}"
+            ImageUriSource="embedded://JustBetweenUs.Core/JustBetweenUs.Assets.clipboard.svg"><!--ImagePosition="Right"-->
+            Copy to Clipboard
+        </controls:EmbeddedImageButton>
+
+        <Button Grid.Row="4" Grid.Column="1" Width="80" Height="50"
+                VerticalAlignment="Center" HorizontalAlignment="Left"
+                Command="{Binding ShowOsInfoCommand}">
+            <StackPanel Orientation="Horizontal">
+                <!--TODO: I don't think I need: winui:AnimatedVisualPlayer - but still need to check all platforms-->
+                <AnimatedVisualPlayer AutoPlay="True"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Height="40" Width="50">
+                    <!--NOTE: Visual Studio doesn't recognize 'embedded:' and the path below, but they are correct and will work fine-->
+                    <lottie:LottieVisualSource UriSource="embedded://JustBetweenUs.Core/JustBetweenUs.Assets.star_icon.json" />
+                </AnimatedVisualPlayer>
             </StackPanel>
         </Button>
-
-        <Button Grid.Row="4" Grid.Column="1" Width="30" Height="50"
-                VerticalAlignment="Center" HorizontalAlignment="Center"
-                Command="{Binding ShowOsInfoCommand}">i</Button>
 
     </Grid>
 </Page>
