@@ -29,6 +29,9 @@
     <PackageReference Include="SkiaSharp.Views.Uno.WinUI" Version="3.119.2" />
     <!-- Bundled Open Sans font -->
     <PackageReference Include="Uno.Fonts.OpenSans" Version="2.8.1" />
+    <!-- SVG rendering support for SvgImageSource on Skia targets -->
+    <PackageReference Include="Svg.Skia" Version="4.2.0" />
+    <PackageReference Include="Uno.WinUI.Svg" Version="6.5.153" />
   </ItemGroup>
 
   <ItemGroup>
