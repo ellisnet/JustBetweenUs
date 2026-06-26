@@ -11,7 +11,7 @@
    limitations under the License.
 */
 
-//FILE DATE/REVISION: 2026-03-28
+//FILE DATE/REVISION: 2026-03-28 - CUSTOM file version, updated for CodeBrix.Platform
 
 // ReSharper disable RedundantCast
 // ReSharper disable RedundantAssignment
@@ -70,7 +70,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-#if (WIN_UI || HAS_UNO) //WIN_UI needs to be manually defined on Win UI projects (and Uno net10.0-windows projects)
+#if (WIN_UI || HAS_CODEBRIX) //WIN_UI needs to be manually defined on Win UI projects (and CodeBrix.Platform net10.0-windows projects)
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -91,7 +91,7 @@ using System.Windows;
 */
 //Note that this also means that any projects that reference the project containing this code, must also have the TargetFramework
 //  set to 'net10.0-windows' - e.g. Tests projects that test the view models that inherit from SimpleViewModel.
-//  (This is not relevant to WIN_UI or HAS_UNO or MAUI projects that include this file.)
+//  (This is not relevant to WIN_UI or HAS_CODEBRIX or MAUI projects that include this file.)
 #endif
 
 #if SIMPLE_ENUM
@@ -172,7 +172,7 @@ public class SimpleDialog : IDisposable
 
     public SimpleDialogButtons Buttons { get; set; }
 
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
     private SimpleDialog(
         Func<XamlRoot> xamlRootGetter,
         DispatcherQueue dispatcher,
@@ -230,7 +230,7 @@ public class SimpleDialog : IDisposable
     }
 
     // ReSharper disable InconsistentNaming
-    //VERY IMPORTANT: With Uno, anything that touches the XamlRoot needs to be running on the main thread.
+    //VERY IMPORTANT: With CodeBrix.Platform, anything that touches the XamlRoot needs to be running on the main thread.
     protected Func<XamlRoot> _xamlRootGetter;
     protected DispatcherQueue _dispatcher;
     // ReSharper restore InconsistentNaming
@@ -283,7 +283,7 @@ public class SimpleDialog : IDisposable
         // ReSharper disable once JoinDeclarationAndInitializer
         SimpleDialogResult result;
 
-#if (WIN_UI || HAS_UNO || MAUI)
+#if (WIN_UI || HAS_CODEBRIX || MAUI)
         string firstButton;
         SimpleDialogResult firstButtonResult;
         string secondButton = null;
@@ -312,7 +312,7 @@ public class SimpleDialog : IDisposable
         }
 #endif
 
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
         result = await _dispatcher.InvokeOnMainThreadAsync(async () =>
         {
             var dlgResult = SimpleDialogResult.None;
@@ -404,7 +404,7 @@ public class SimpleDialog : IDisposable
         if (disposing)
         {
             _isDisposed = true;
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
             _xamlRootGetter = null;
             _dispatcher = null;
 #elif (MAUI)
@@ -416,7 +416,7 @@ public class SimpleDialog : IDisposable
     #endregion
 }
 
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
 internal static class DispatcherHelper
 {
     internal static void InvokeOnMainThread(this DispatcherQueue dispatcher, Action functionToExecute)
@@ -519,7 +519,7 @@ public interface IXamlRootGetter
 }
 #endif
 
-#if (WIN_UI || HAS_UNO || MAUI)
+#if (WIN_UI || HAS_CODEBRIX || MAUI)
 public abstract class SimpleViewModel : IXamlRootGetter, INotifyPropertyChanged, IDisposable
 #else
 public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
@@ -530,7 +530,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
     protected bool _isUnderTest;
     // ReSharper restore InconsistentNaming
 
-#if (WIN_UI || HAS_UNO || MAUI)
+#if (WIN_UI || HAS_CODEBRIX || MAUI)
     //Don't currently know how to check and see if the view-model instance is in "design mode" -
     //  for WinUI and .NET MAUI.
     protected static bool IsDesignMode(bool defaultValueIfNotSet) =>
@@ -555,7 +555,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 
     public static void SetIsDesignMode(bool isDesignMode) => _isInDesignMode = isDesignMode;
 
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
     private DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
 
     private Func<XamlRoot> _xamlRootGetter;
@@ -575,7 +575,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
         catch (InvalidOperationException) { throw; }
         catch (Exception e)
         {
-            throw new InvalidOperationException("Getting XamlRoot on WinUI and Uno can fail if not executed on the main thread.", e);
+            throw new InvalidOperationException("Getting XamlRoot on WinUI and CodeBrix.Platform can fail if not executed on the main thread.", e);
         }
     }
 
@@ -773,7 +773,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 
     #region | Dialog helpers |
 
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
     protected virtual SimpleDialog CreateDialog(
         string message,
         string title = null,
@@ -854,7 +854,7 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
 
     #endregion
 
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
 
     protected static Visibility GetVisibility(bool isVisible) {
         return isVisible ? Visibility.Visible : Visibility.Collapsed;
@@ -1181,11 +1181,11 @@ public abstract class SimpleViewModel : INotifyPropertyChanged, IDisposable
             }
             PropertyChanged = null;
 
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
             _dispatcher = null;
 #endif
 
-#if (WIN_UI || HAS_UNO || MAUI)
+#if (WIN_UI || HAS_CODEBRIX || MAUI)
             _xamlRootGetter = null;
 #endif
         }
@@ -1223,7 +1223,7 @@ public class AffectsAllCommandsAttribute : Attribute;
 
 public class SimpleCommand : ICommand, IDisposable
 {
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
     private DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
 
     private DispatcherQueue GetDispatcher()
@@ -1426,7 +1426,7 @@ public class SimpleCommand : ICommand, IDisposable
                 case ExecuteStyle.SyncWithParam:
                     if (executeOnMain)
                     {
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
                         var dispatcher = GetDispatcher();
                         if (dispatcher != null)
                         {
@@ -1452,7 +1452,7 @@ public class SimpleCommand : ICommand, IDisposable
                 case ExecuteStyle.SyncNoParam:
                     if (executeOnMain)
                     {
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
                         var dispatcher = GetDispatcher();
                         if (dispatcher != null)
                         {
@@ -1478,7 +1478,7 @@ public class SimpleCommand : ICommand, IDisposable
                 case ExecuteStyle.AsyncWithParam:
                     if (executeOnMain)
                     {
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
                         var dispatcher = GetDispatcher();
                         if (dispatcher != null)
                         {
@@ -1509,7 +1509,7 @@ public class SimpleCommand : ICommand, IDisposable
                 case ExecuteStyle.AsyncNoParam:
                     if (executeOnMain)
                     {
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
                         var dispatcher = GetDispatcher();
                         if (dispatcher != null)
                         {
@@ -1562,7 +1562,7 @@ public class SimpleCommand : ICommand, IDisposable
         {
             if (ShouldRaiseCanExecuteOnMainThread)
             {
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
                 var dispatcher = GetDispatcher();
                 if (dispatcher != null)
                 {
@@ -1617,7 +1617,7 @@ public class SimpleCommand : ICommand, IDisposable
             _executeNoParamSync = null;
             _executeNoParamAsync = null;
 
-#if (WIN_UI || HAS_UNO)
+#if (WIN_UI || HAS_CODEBRIX)
             _dispatcher = null;
 #endif
         }
@@ -3817,14 +3817,15 @@ public class SimpleOsInfo
             ProductNameDisplay = null
         };
 
-#if (MAUI || HAS_UNO)
+#if (MAUI || HAS_CODEBRIX)
         var version = string.Empty;
         var major = 0;
         var minor = 0;
         var build = 0;
 
-        //Model and Manufacturer info will only be present with MAUI - not Uno - I haven't found a method
-        //  equivalent to DeviceInfo.Current for getting this information on Android running with Uno.
+        //Model and Manufacturer info will only be present with MAUI - not CodeBrix.Platform - I haven't found a method
+        //  equivalent to DeviceInfo.Current for getting this information on Android running with CodeBrix.Platform.
+        //  Further note: CodeBrix.Platform is not supported on Android.
 
         var model = string.Empty;
         var manufacturer = string.Empty;
@@ -3858,7 +3859,7 @@ public class SimpleOsInfo
         model = DeviceInfo.Current.Model?.Trim() ?? string.Empty;
         manufacturer = DeviceInfo.Current.Manufacturer?.Trim() ?? string.Empty;
 
-#elif HAS_UNO
+#elif HAS_CODEBRIX
         try
         {
 #pragma warning disable Uno0001  //This code section is only active on Android
@@ -3915,7 +3916,7 @@ public class SimpleOsInfo
                 result.ProductName = $"Android {version}";
             }
 
-            //See note above - model and manufacturer only available on MAUI, not Uno
+            //See note above - model and manufacturer only available on MAUI, not CodeBrix.Platform
             if (string.IsNullOrWhiteSpace(model))
             {
                 result.ProductNameDisplay = result.ProductName;
@@ -3938,7 +3939,7 @@ public class SimpleOsInfo
 
 #if MAUI
     public bool IsAndroid => DeviceInfo.Current.Platform == DevicePlatform.Android;
-#elif (WIN_UI || HAS_UNO)
+#elif (WIN_UI || HAS_CODEBRIX)
     public bool IsAndroid => (Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily?.Trim() ?? string.Empty)
         .StartsWith("Android.", StringComparison.InvariantCultureIgnoreCase);
 #else

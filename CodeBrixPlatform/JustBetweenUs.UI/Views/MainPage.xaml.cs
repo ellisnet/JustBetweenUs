@@ -33,7 +33,7 @@ public sealed partial class MainPage : Page
 
         //TODO: Take this out, when I am sure that the CodeBrix.Platform.Fonts.OpenSans package is working correctly
 
-        // Verify that the Uno.Fonts.OpenSans NuGet package is present and being
+        // Verify that the CodeBrix.Platform.Fonts.OpenSans NuGet package is present and being
         // utilized correctly. The Page's FontFamily should resolve to the OpenSans
         // .ttf file via the StaticResource OpenSansFont defined in App.xaml.
         // If the package is missing or misconfigured, the font will silently fall

@@ -14,7 +14,7 @@ public interface ICopyToClipboard
     Action<string> CopyTextToClipboard { get; set; }
 }
 
-#if HAS_UNO
+#if HAS_CODEBRIX
 [Microsoft.UI.Xaml.Data.Bindable]
 #endif
 public class MainViewModel : SimpleViewModel, ICopyToClipboard
@@ -245,8 +245,9 @@ public class MainViewModel : SimpleViewModel, ICopyToClipboard
             sb.AppendLine($"Product name: {_osInfo.ProductName}");
             sb.AppendLine($"Product name (for display): {_osInfo.ProductNameDisplay}");
 
-            //Note that when running via Uno on Android, the following lines will not be displayed - since
+            //Note that when running via CodeBrix.Platform on Android, the following lines will not be displayed - since
             //  the SimpleDialog text is truncated on this platform - it must have a maximum number of lines.
+            //  Further note: CodeBrix.Platform is not supported on Android
             sb.AppendLine($"Running as user: {_osInfo.RunningAsUser}{((_osInfo.IsAdminUser is true) ? " (local admin)" : "")}");
             sb.AppendLine($"DotNet version: {_osInfo.DotNetVersion}");
             sb.AppendLine($"Platform architecture: {_osInfo.PlatformArchitecture}");

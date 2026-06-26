@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
 
     <!-- Uno needs this define for its internal conditional compilation -->
-    <DefineConstants>$(DefineConstants);HAS_UNO;HAS_UNO_WINUI</DefineConstants>
+    <DefineConstants>$(DefineConstants);HAS_CODEBRIX;HAS_CODEBRIX_WINUI</DefineConstants>
   </PropertyGroup>
 
   <!-- Tell MSBuild to treat .xaml files as Uno XAML pages -->

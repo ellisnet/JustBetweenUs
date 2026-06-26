@@ -16,7 +16,7 @@ public partial class App : Application
     public App()
     {
         //Set Open Sans as the default font for all text in application
-        global::Uno.UI.FeatureConfiguration.Font.DefaultTextFontFamily = "ms-appx:///Uno.Fonts.OpenSans/Fonts/OpenSans.ttf";
+        global::CodeBrix.Platform.UI.FeatureConfiguration.Font.DefaultTextFontFamily = "ms-appx:///CodeBrix.Platform.Fonts.OpenSans/Fonts/OpenSans.ttf";
 
         SimpleServiceResolver.CreateInstance(services =>
         {
@@ -64,15 +64,15 @@ public partial class App : Application
         {
             builder.AddConsole();
             builder.SetMinimumLevel(LogLevel.Information);
-            builder.AddFilter("Uno", LogLevel.Warning);
+            builder.AddFilter("CodeBrix.Platform", LogLevel.Warning);
             builder.AddFilter("Windows", LogLevel.Warning);
             builder.AddFilter("Microsoft", LogLevel.Warning);
         });
 
-        global::Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory = factory;
+        global::CodeBrix.Platform.Extensions.LogExtensionPoint.AmbientLoggerFactory = factory;
 
-#if HAS_UNO
-        global::Uno.UI.Adapter.Microsoft.Extensions.Logging.LoggingAdapter.Initialize();
+#if HAS_CODEBRIX
+        global::CodeBrix.Platform.UI.Adapter.Microsoft.Extensions.Logging.LoggingAdapter.Initialize();
 #endif
 #endif
     }

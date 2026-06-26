@@ -70,10 +70,10 @@ public sealed class EmbeddedImage : Image
 
                 // Copy embedded resource into an IRandomAccessStream.
                 // Note: ras and writeStream are intentionally not disposed here.
-                // - Disposing writeStream closes the underlying ras (Uno behavior).
+                // - Disposing writeStream closes the underlying ras (Platform behavior).
                 // - Disposing ras is unsafe because SetSourceAsync may retain a reference
                 //   to the stream rather than copying its contents, and that contract is
-                //   not guaranteed across Uno Platform targets.
+                //   not guaranteed across CodeBrix Platform targets.
                 // - InMemoryRandomAccessStream is backed entirely by managed memory (no
                 //   file handles or unmanaged resources), so the GC will reclaim it once
                 //   the image source releases its reference.
