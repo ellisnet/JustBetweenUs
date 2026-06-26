@@ -20,17 +20,4 @@ internal class Program
 
         await host.RunAsync();
     }
-
-    //[STAThread]
-    //public static void Main(string[] args)
-    //{
-    //    App.InitializeLogging();
-
-    //    var host = UnoPlatformHostBuilder.Create()
-    //        .App(() => new App())
-    //        .UseWin32()
-    //        .Build();
-
-    //    host.Run();
-    //}
 }
