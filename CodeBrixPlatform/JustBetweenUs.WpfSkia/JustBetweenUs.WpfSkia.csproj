@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+
+    <!-- Uno needs this define for its internal conditional compilation -->
+    <DefineConstants>$(DefineConstants);HAS_UNO;HAS_UNO_WINUI</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JustBetweenUs.Core\JustBetweenUs.Core.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\JustBetweenUs.UI\JustBetweenUs.UI.projitems" Label="Shared" />
+
+</Project>

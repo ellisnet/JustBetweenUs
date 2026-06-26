@@ -40,6 +40,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Assets", "Shared Ass
 		Shared\Assets\star_icon.json = Shared\Assets\star_icon.json
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.WpfSkia", "CodeBrixPlatform\JustBetweenUs.WpfSkia\JustBetweenUs.WpfSkia.csproj", "{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -274,6 +276,26 @@ Global
 		{68E2144E-728C-14C5-9080-64BC4E2F1039}.Release|x64.Build.0 = Release|Any CPU
 		{68E2144E-728C-14C5-9080-64BC4E2F1039}.Release|x86.ActiveCfg = Release|Any CPU
 		{68E2144E-728C-14C5-9080-64BC4E2F1039}.Release|x86.Build.0 = Release|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Debug|ARM CPU.ActiveCfg = Debug|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Debug|ARM CPU.Build.0 = Debug|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Debug|arm64.Build.0 = Debug|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Debug|x64.Build.0 = Debug|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Debug|x86.Build.0 = Debug|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Release|ARM CPU.ActiveCfg = Release|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Release|ARM CPU.Build.0 = Release|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Release|arm64.ActiveCfg = Release|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Release|arm64.Build.0 = Release|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Release|x64.ActiveCfg = Release|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Release|x64.Build.0 = Release|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Release|x86.ActiveCfg = Release|Any CPU
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -288,6 +310,7 @@ Global
 		{EC432886-B362-B8EA-EDDE-818E9F134180} = {8A752639-0C89-4EA0-B926-25915690EEEC}
 		{68E2144E-728C-14C5-9080-64BC4E2F1039} = {8A752639-0C89-4EA0-B926-25915690EEEC}
 		{74072EA2-EC24-49F6-A19D-8CDECE8ACDCC} = {20FDBD45-4944-4EDC-9AA8-358B0D22AED7}
+		{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99} = {8A752639-0C89-4EA0-B926-25915690EEEC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A3274A4-C353-477F-BF9E-2B60BE8D44E8}
@@ -297,6 +320,7 @@ Global
 		CodeBrixPlatform\JustBetweenUs.UI\JustBetweenUs.UI.projitems*{4a6cb388-8dff-ae24-6a2e-f7c5cbdc7d5d}*SharedItemsImports = 5
 		CodeBrixPlatform\JustBetweenUs.UI\JustBetweenUs.UI.projitems*{68e2144e-728c-14c5-9080-64bc4e2f1039}*SharedItemsImports = 5
 		CodeBrixPlatform\JustBetweenUs.UI\JustBetweenUs.UI.projitems*{82f3d706-a9ac-46f4-9d9c-332667ae4a54}*SharedItemsImports = 5
+		CodeBrixPlatform\JustBetweenUs.UI\JustBetweenUs.UI.projitems*{ab910b4b-5b33-4ac6-a177-48f5eafcec99}*SharedItemsImports = 5
 		CodeBrixPlatform\JustBetweenUs.UI\JustBetweenUs.UI.projitems*{ec432886-b362-b8ea-edde-818e9f134180}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
