@@ -24,7 +24,8 @@
     All other packages come from JustBetweenUs.Core.
   -->
   <ItemGroup>
-    <PackageReference Include="Uno.WinUI.Runtime.Skia.Win32" Version="6.5.153" />
+    <!--Get rid of Uno: <PackageReference Include="Uno.WinUI.Runtime.Skia.Win32" Version="6.5.153" />-->
+    <PackageReference Include="CodeBrix.Platform.Runtime.Skia.Win32.ApacheLicenseForever" Version="1.0.178.375" />
   </ItemGroup>
 
 </Project>

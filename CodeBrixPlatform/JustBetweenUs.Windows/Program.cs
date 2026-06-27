@@ -1,6 +1,6 @@
+using CodeBrix.Platform.UI.Hosting;
 using System;
 using System.Threading.Tasks;
-using Uno.UI.Hosting;
 
 // ReSharper disable CheckNamespace
 
@@ -13,7 +13,7 @@ internal class Program
     {
         App.InitializeLogging();
 
-        var host = UnoPlatformHostBuilder.Create()
+        var host = CodeBrixPlatformHostBuilder.Create()
             .App(() => new App())
             .UseWin32()
             .Build();
