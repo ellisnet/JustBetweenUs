@@ -15,7 +15,7 @@ internal class Program
 
         var host = CodeBrixPlatformHostBuilder.Create()
             .App(() => new App())
-            .UseWin32()
+            .UseWindowsWin32()
             .Build();
 
         await host.RunAsync();

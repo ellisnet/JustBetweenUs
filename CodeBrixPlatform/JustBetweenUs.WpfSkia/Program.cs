@@ -15,7 +15,7 @@ internal class Program
 
         var host = CodeBrixPlatformHostBuilder.Create()
             .App(() => new App())
-            .UseWindows()
+            .UseWindowsWpf()
             .Build();
 
         // The WPF host's default OpenGL renderer draws via raw opengl32 onto WPF's own
