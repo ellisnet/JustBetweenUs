@@ -18,35 +18,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--Keep these - no changes-->
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.9" />
-
-    <!--Get rid of Uno: <PackageReference Include="Uno.WinUI" Version="6.5.153" />-->
     <PackageReference Include="CodeBrix.Platform.ApacheLicenseForever" Version="1.0.178.1001" />
-    <!--Get rid of Uno: <PackageReference Include="Uno.WinUI.Graphics2DSK" Version="6.5.153" />-->
     <PackageReference Include="CodeBrix.Platform.Graphics2DSK.ApacheLicenseForever" Version="1.0.178.1001" />
-    <!--Get rid of Uno: <PackageReference Include="Uno.UI.Adapter.Microsoft.Extensions.Logging" Version="6.5.153" />-->
 
     <!-- Lottie/Skottie animation support -->
-    <!--Get rid of Uno: <PackageReference Include="Uno.WinUI.Lottie" Version="6.5.153" />-->
     <PackageReference Include="CodeBrix.Platform.Lottie.ApacheLicenseForever" Version="1.0.178.1001" />
-
-    <!--Keep SkiaSharp.Skottie - no changes-->
     <PackageReference Include="SkiaSharp.Skottie" Version="3.119.4" />
-
-    <!--Get rid of Uno: <PackageReference Include="SkiaSharp.Views.Uno.WinUI" Version="3.119.4" />-->
     <PackageReference Include="CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever" Version="3.119.4" />
 
     <!-- Bundled Open Sans font -->
-    <!--Was previously: <PackageReference Include="Uno.Fonts.OpenSans" Version="2.8.1" />-->
     <PackageReference Include="CodeBrix.Platform.Fonts.OpenSans.ApacheLicenseForever" Version="1.0.165.55" />
 
     <!-- SVG rendering support for SvgImageSource on Skia targets -->
-    <!--Was previously: <PackageReference Include="Svg.Skia" Version="4.2.0" />-->
     <PackageReference Include="CodeBrix.SkiaSvg.MitLicenseForever" Version="1.0.165.152" />
-
-    <!--Get rid of Uno: <PackageReference Include="Uno.WinUI.Svg" Version="6.5.153" />-->
     <PackageReference Include="CodeBrix.Platform.Svg.ApacheLicenseForever" Version="1.0.178.1001" />
   </ItemGroup>
 

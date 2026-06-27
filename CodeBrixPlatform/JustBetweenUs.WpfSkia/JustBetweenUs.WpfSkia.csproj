@@ -31,7 +31,6 @@
     All other packages come from JustBetweenUs.Core.
   -->
   <ItemGroup>
-    <!--Get rid of Uno: <PackageReference Include="Uno.WinUI.Runtime.Skia.Wpf" Version="6.5.153" />-->
     <PackageReference Include="CodeBrix.Platform.Runtime.Skia.Wpf.ApacheLicenseForever" Version="1.0.178.1001" />
   </ItemGroup>
 
