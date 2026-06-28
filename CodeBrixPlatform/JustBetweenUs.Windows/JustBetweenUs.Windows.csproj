@@ -24,7 +24,7 @@
     All other packages come from JustBetweenUs.Core.
   -->
   <ItemGroup>
-    <PackageReference Include="CodeBrix.Platform.Runtime.Skia.Win32.ApacheLicenseForever" Version="1.0.178.1001" />
+    <PackageReference Include="CodeBrix.Platform.Runtime.Skia.Win32.ApacheLicenseForever" Version="1.0.179.226" />
   </ItemGroup>
 
 </Project>
