@@ -45,7 +45,9 @@ public class MainViewModel : SimpleViewModel, ICopyToClipboard
             // ReSharper disable once AsyncVoidLambda
             new Task(async () => //intentionally a fire-and-forget task
             {
-                EncryptionKey = await _encryptSvc.GetDefaultKey();
+                var defaultKey = await _encryptSvc.GetDefaultKey();
+                //We can't set a value to EncryptionKey except on the main (UI) thread, because this causes problems on Linux and macOS
+                InvokeOnMainThread(() => EncryptionKey = defaultKey);
                 await Task.Delay(2000);
                 await ShowInfo("This application is adapted from a sample provided by Paul Ainsworth.");
             }).Start();
