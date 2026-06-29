@@ -25,6 +25,6 @@
     All other packages come from JustBetweenUs.Core.
   -->
   <ItemGroup>
-    <PackageReference Include="CodeBrix.Platform.Runtime.Skia.FrameBuffer.ApacheLicenseForever" Version="1.0.179.226" />
+    <PackageReference Include="CodeBrix.Platform.Runtime.Skia.FrameBuffer.ApacheLicenseForever" Version="1.0.180.353" />
   </ItemGroup>
 </Project>
