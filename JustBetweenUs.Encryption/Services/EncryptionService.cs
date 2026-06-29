@@ -58,6 +58,21 @@ public class EncryptionService : IEncryptionService
 
     #region | IEncryptionService implementation |
 
+    //Strips any character that is not part of the standard Base64 alphabet
+    //  (A-Z, a-z, 0-9, '+', '/', '='). This guards against invisible junk that
+    //  can ride along on a copy/paste round-trip - e.g. a stray U+0001 control
+    //  character that was observed being prepended on the clipboard->TextBox path
+    //  on Intel/x64 macOS. Such characters are never part of valid Base64, so it
+    //  is always safe to remove them before decoding.
+    private static string CleanBase64(string text) =>
+        string.IsNullOrEmpty(text)
+            ? text ?? string.Empty
+            : new string(text.Where(c =>
+                (c >= 'A' && c <= 'Z') ||
+                (c >= 'a' && c <= 'z') ||
+                (c >= '0' && c <= '9') ||
+                c == '+' || c == '/' || c == '=').ToArray());
+
     public bool IsBase64Text(string text)
     {
         var result = false;
@@ -66,7 +81,7 @@ public class EncryptionService : IEncryptionService
         {
             try
             {
-                var converted = Convert.FromBase64String(text.Trim());
+                var converted = Convert.FromBase64String(CleanBase64(text));
                 result = converted is { Length: > 0 };
             }
             catch (Exception)
@@ -175,7 +190,7 @@ public class EncryptionService : IEncryptionService
                 var keyBytes = await GetKeyBytes(key);
 
                 //Bytes to decrypt
-                var decryptBytes = await Task.Run(() => Convert.FromBase64String(toDecrypt.Trim()));
+                var decryptBytes = await Task.Run(() => Convert.FromBase64String(CleanBase64(toDecrypt)));
 
                 //Decryption
                 using var tripleDes = TripleDES.Create(); //TripleDESCryptoServiceProvider appears to be obsolete 
@@ -288,7 +303,7 @@ public class EncryptionService : IEncryptionService
                 var keyBytes = await GetKeyBytes(key);
 
                 //Bytes to decrypt
-                var decryptBytes = await Task.Run(() => Convert.FromBase64String(toDecrypt.Trim()));
+                var decryptBytes = await Task.Run(() => Convert.FromBase64String(CleanBase64(toDecrypt)));
 
                 //Decryption
 
@@ -395,7 +410,7 @@ public class EncryptionService : IEncryptionService
                 var keyBytes = await GetKeyBytes(key);
 
                 //Bytes to decrypt
-                var decryptBytes = await Task.Run(() => Convert.FromBase64String(toDecrypt.Trim()));
+                var decryptBytes = await Task.Run(() => Convert.FromBase64String(CleanBase64(toDecrypt)));
 
                 //Separate our salt bytes from the end of the incoming byte array - see notes in AES_DecryptFromBase64
                 //Our incoming array of bytes-to-decrypt must be longer than our salt length

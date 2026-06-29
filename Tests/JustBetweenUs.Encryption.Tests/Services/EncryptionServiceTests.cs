@@ -146,6 +146,25 @@ https://en.wikipedia.org/wiki/Symmetric-key_algorithm")]
     }
 
     [Theory]
+    [InlineData("27544076", "This is a test.")]
+    public async Task AES_decrypt_tolerates_stray_control_chars_from_clipboard(string key, string message)
+    {
+        //Arrange - reproduce the Intel/x64 macOS clipboard glitch where an invisible
+        //  U+0001 control character was being prepended to the pasted Base64 text,
+        //  which made IsBase64Text() return false and blocked decryption.
+        var crypt = GetService();
+        var encrypted = await crypt.AES_EncryptToBase64(key, message);
+        var corrupted = "\u0001" + encrypted; //stray SOH char at index 0, as seen in the [DIAG] output
+
+        //Act + Assert - the corrupted text must still be recognized as encrypted...
+        crypt.IsBase64Text(corrupted).Should().BeTrue();
+
+        //...and must still decrypt back to the original message.
+        var decrypted = await crypt.AES_DecryptFromBase64(key, corrupted);
+        decrypted.Should().Be(message);
+    }
+
+    [Theory]
     [InlineData("27544076",
     @"Twofish is a very powerful symmetric key encryption algorithm. It was a strong contender for being chosen as the AES standard encryption algorithm; but was beat out by Rijndael on performance (supposedly).
 It has never been cracked, as far as we know.
