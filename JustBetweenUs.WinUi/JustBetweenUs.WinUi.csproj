@@ -35,6 +35,35 @@
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
     <Manifest Include="$(ApplicationManifest)" />
+
+    <!-- Skia-based SVG rendering for the Encrypt/Decrypt/Copy icons (matches the
+         CodeBrix.Platform Skia heads; NOT a CodeBrix.Platform.* package). -->
+    <PackageReference Include="CodeBrix.SkiaSvg.MitLicenseForever" Version="1.0.180.239" />
+    <!-- Native (non-CodeBrix) Lottie player for the info-button star animation. -->
+    <PackageReference Include="CommunityToolkit.WinUI.Lottie" Version="8.2.250604" />
+    <!-- Win2D backs the Lottie player. An explicit reference is required: Lottie's
+         transitive floor is an old Win2D (1.0.5.1) that uses the legacy win10-* RID
+         folders, which .NET 10 no longer maps from win-arm64 — so its native
+         Microsoft.Graphics.Canvas.dll fails to deploy on ARM64. 1.4.0 uses the modern
+         runtimes/win-<arch>/native layout and deploys correctly on x64 and ARM64. -->
+    <PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
+  </ItemGroup>
+
+  <!-- Shared image assets. SVGs are embedded (loaded via embedded:// in EmbeddedImage);
+       the Lottie JSON is content loaded via ms-appx:///Assets/star_icon.json. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\Shared\Assets\padlock-icon.svg" Link="Assets\padlock-icon.svg">
+      <LogicalName>JustBetweenUs.WinUi.Assets.padlock-icon.svg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Shared\Assets\unlocked-icon.svg" Link="Assets\unlocked-icon.svg">
+      <LogicalName>JustBetweenUs.WinUi.Assets.unlocked-icon.svg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Shared\Assets\clipboard.svg" Link="Assets\clipboard.svg">
+      <LogicalName>JustBetweenUs.WinUi.Assets.clipboard.svg</LogicalName>
+    </EmbeddedResource>
+    <Content Include="..\Shared\Assets\star_icon.json" Link="Assets\star_icon.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <!--
