@@ -31,7 +31,7 @@
     All other packages come from JustBetweenUs.Core.
   -->
   <ItemGroup>
-    <PackageReference Include="CodeBrix.Platform.Runtime.Skia.Wpf.ApacheLicenseForever" Version="1.0.180.353" />
+    <PackageReference Include="CodeBrix.Platform.Runtime.Skia.Wpf.ApacheLicenseForever" Version="1.0.182.216" />
   </ItemGroup>
 
 </Project>

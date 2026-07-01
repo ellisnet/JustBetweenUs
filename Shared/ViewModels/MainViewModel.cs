@@ -6,6 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+#if HAS_CODEBRIX
+using CodeBrix.Platform.Simple;
+#endif
+
 // ReSharper disable once CheckNamespace
 namespace JustBetweenUs.ViewModels;
 

@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
 
+#if HAS_CODEBRIX
+using CodeBrix.Platform.Simple;
+#endif
+
 // ReSharper disable once CheckNamespace
 namespace JustBetweenUs.ViewModels;
 
