@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+
+    <!--IMPORTANT NOTE: When running this on Linux on an ARM64 machine - like the Raspberry
+    Pi - there is currently a bug in the SkiaSharp functionality - as of 3/15/2026 -
+    see more notes in the Program.cs file.-->
+
+    <!-- Uno needs this define for its internal conditional compilation -->
+    <DefineConstants>$(DefineConstants);HAS_CODEBRIX;HAS_CODEBRIX_WINUI</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Tell MSBuild to treat .xaml files as Uno XAML pages -->
+  <ItemGroup>
+    <Page Include="**\*.xaml" Exclude="bin\**\*.xaml;obj\**\*.xaml" />
+    <None Remove="**\*.xaml" />
+  </ItemGroup>
+
+  <!-- Shared UI files (linked from JustBetweenUs.Shared) -->
+  <Import Project="..\JustBetweenUs.UI\JustBetweenUs.UI.projitems" Label="Shared" />
+  <ItemGroup>
+    <ProjectReference Include="..\JustBetweenUs.Core\JustBetweenUs.Core.csproj" />
+  </ItemGroup>
+
+  <!--
+    Platform-specific package: native Wayland Skia backend for Linux desktops.
+    Requires a running Wayland compositor; it never falls back to X11/XWayland
+    (use JustBetweenUs.LinuxX11 for X11/XWayland environments).
+    All other packages come from JustBetweenUs.Core.
+  -->
+  <ItemGroup>
+    <PackageReference Include="CodeBrix.Platform.Runtime.Skia.Wayland.ApacheLicenseForever" Version="1.0.183.233" />
+  </ItemGroup>
+
+</Project>

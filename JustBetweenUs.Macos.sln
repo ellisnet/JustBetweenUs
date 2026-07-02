@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.Core", "CodeB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.LinuxX11", "CodeBrixPlatform\JustBetweenUs.LinuxX11\JustBetweenUs.LinuxX11.csproj", "{82F3D706-A9AC-46F4-9D9C-332667AE4A54}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.LinuxWayland", "CodeBrixPlatform\JustBetweenUs.LinuxWayland\JustBetweenUs.LinuxWayland.csproj", "{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.LinuxFrameBuffer", "CodeBrixPlatform\JustBetweenUs.LinuxFrameBuffer\JustBetweenUs.LinuxFrameBuffer.csproj", "{4A6CB388-8DFF-AE24-6A2E-F7C5CBDC7D5D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.MacOs", "CodeBrixPlatform\JustBetweenUs.MacOs\JustBetweenUs.MacOs.csproj", "{EC432886-B362-B8EA-EDDE-818E9F134180}"
@@ -160,6 +162,26 @@ Global
 		{82F3D706-A9AC-46F4-9D9C-332667AE4A54}.Release|x64.Build.0 = Release|Any CPU
 		{82F3D706-A9AC-46F4-9D9C-332667AE4A54}.Release|x86.ActiveCfg = Release|Any CPU
 		{82F3D706-A9AC-46F4-9D9C-332667AE4A54}.Release|x86.Build.0 = Release|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Debug|ARM CPU.ActiveCfg = Debug|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Debug|ARM CPU.Build.0 = Debug|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Debug|arm64.Build.0 = Debug|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Debug|x64.Build.0 = Debug|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Debug|x86.Build.0 = Debug|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Release|ARM CPU.ActiveCfg = Release|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Release|ARM CPU.Build.0 = Release|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Release|arm64.ActiveCfg = Release|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Release|arm64.Build.0 = Release|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Release|x64.ActiveCfg = Release|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Release|x64.Build.0 = Release|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Release|x86.ActiveCfg = Release|Any CPU
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA}.Release|x86.Build.0 = Release|Any CPU
 		{4A6CB388-8DFF-AE24-6A2E-F7C5CBDC7D5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4A6CB388-8DFF-AE24-6A2E-F7C5CBDC7D5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A6CB388-8DFF-AE24-6A2E-F7C5CBDC7D5D}.Debug|ARM CPU.ActiveCfg = Debug|Any CPU
@@ -230,6 +252,7 @@ Global
 		{13903639-2FEE-43D3-A920-4FB073E6702B} = {8A752639-0C89-4EA0-B926-25915690EEEC}
 		{A1E199C7-EE83-E939-2A04-B84B446EB766} = {8A752639-0C89-4EA0-B926-25915690EEEC}
 		{82F3D706-A9AC-46F4-9D9C-332667AE4A54} = {8A752639-0C89-4EA0-B926-25915690EEEC}
+		{CC4E1275-93C3-4F6D-8EB4-CD2137BABEFA} = {8A752639-0C89-4EA0-B926-25915690EEEC}
 		{4A6CB388-8DFF-AE24-6A2E-F7C5CBDC7D5D} = {8A752639-0C89-4EA0-B926-25915690EEEC}
 		{EC432886-B362-B8EA-EDDE-818E9F134180} = {8A752639-0C89-4EA0-B926-25915690EEEC}
 		{68E2144E-728C-14C5-9080-64BC4E2F1039} = {8A752639-0C89-4EA0-B926-25915690EEEC}
@@ -243,6 +266,7 @@ Global
 		CodeBrixPlatform\JustBetweenUs.UI\JustBetweenUs.UI.projitems*{4a6cb388-8dff-ae24-6a2e-f7c5cbdc7d5d}*SharedItemsImports = 5
 		CodeBrixPlatform\JustBetweenUs.UI\JustBetweenUs.UI.projitems*{68e2144e-728c-14c5-9080-64bc4e2f1039}*SharedItemsImports = 5
 		CodeBrixPlatform\JustBetweenUs.UI\JustBetweenUs.UI.projitems*{82f3d706-a9ac-46f4-9d9c-332667ae4a54}*SharedItemsImports = 5
+		CodeBrixPlatform\JustBetweenUs.UI\JustBetweenUs.UI.projitems*{cc4e1275-93c3-4f6d-8eb4-cd2137babefa}*SharedItemsImports = 5
 		CodeBrixPlatform\JustBetweenUs.UI\JustBetweenUs.UI.projitems*{ec432886-b362-b8ea-edde-818e9f134180}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
