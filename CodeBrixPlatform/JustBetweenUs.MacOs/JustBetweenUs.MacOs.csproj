@@ -24,6 +24,6 @@
     All other packages come from JustBetweenUs.Core.
   -->
   <ItemGroup>
-    <PackageReference Include="CodeBrix.Platform.Runtime.Skia.MacOS.ApacheLicenseForever" Version="1.0.182.216" />
+    <PackageReference Include="CodeBrix.Platform.Runtime.Skia.MacOS.ApacheLicenseForever" Version="1.0.183.233" />
   </ItemGroup>
 </Project>
