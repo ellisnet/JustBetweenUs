@@ -86,22 +86,4 @@
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <DefineConstants>$(DefineConstants);RESOLVE_SERVICES;SIMPLE_ENUM;SIMPLE_MESSAGING;WIN_UI</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <DefineConstants>$(DefineConstants);RESOLVE_SERVICES;SIMPLE_ENUM;SIMPLE_MESSAGING;WIN_UI</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <DefineConstants>$(DefineConstants);RESOLVE_SERVICES;SIMPLE_ENUM;SIMPLE_MESSAGING;WIN_UI</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <DefineConstants>$(DefineConstants);RESOLVE_SERVICES;SIMPLE_ENUM;SIMPLE_MESSAGING;WIN_UI</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <DefineConstants>$(DefineConstants);RESOLVE_SERVICES;SIMPLE_ENUM;SIMPLE_MESSAGING;WIN_UI</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <DefineConstants>$(DefineConstants);RESOLVE_SERVICES;SIMPLE_ENUM;SIMPLE_MESSAGING;WIN_UI</DefineConstants>
-  </PropertyGroup>
 </Project>

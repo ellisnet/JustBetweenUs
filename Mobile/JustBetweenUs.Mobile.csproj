@@ -39,35 +39,35 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-android|AnyCPU'">
-	  <DefineConstants>$(DefineConstants);MAUI;SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+	  <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-ios|AnyCPU'">
-	  <DefineConstants>$(DefineConstants);MAUI;SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+	  <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-maccatalyst|AnyCPU'">
-	  <DefineConstants>$(DefineConstants);MAUI;SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+	  <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.19041.0|AnyCPU'">
-	  <DefineConstants>$(DefineConstants);MAUI;SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+	  <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-android|AnyCPU'">
-	  <DefineConstants>$(DefineConstants);MAUI;SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+	  <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-ios|AnyCPU'">
-	  <DefineConstants>$(DefineConstants);MAUI;SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+	  <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-maccatalyst|AnyCPU'">
-	  <DefineConstants>$(DefineConstants);MAUI;SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+	  <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-windows10.0.19041.0|AnyCPU'">
-	  <DefineConstants>$(DefineConstants);MAUI;SIMPLE_ENUM;SIMPLE_MESSAGING;RESOLVE_SERVICES</DefineConstants>
+	  <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
 	</PropertyGroup>
 
 	<ItemGroup>

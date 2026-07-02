@@ -6,7 +6,7 @@
     <RootNamespace>JustBetweenUs</RootNamespace>
 
     <!-- CodeBrix.Platform needs this define for its internal conditional compilation -->
-    <DefineConstants>$(DefineConstants);HAS_CODEBRIX;HAS_CODEBRIX_WINUI;RESOLVE_SERVICES;SIMPLE_ENUM;SIMPLE_MESSAGING</DefineConstants>
+    <DefineConstants>$(DefineConstants);HAS_CODEBRIX;HAS_CODEBRIX_WINUI</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\Shared\Helpers\HostHelper.cs" Link="Helpers\HostHelper.cs" />
