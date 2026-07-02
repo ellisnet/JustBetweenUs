@@ -23,7 +23,7 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "JustBetweenUs.UI", "CodeBri
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.Core", "CodeBrixPlatform\JustBetweenUs.Core\JustBetweenUs.Core.csproj", "{A1E199C7-EE83-E939-2A04-B84B446EB766}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.Linux", "CodeBrixPlatform\JustBetweenUs.Linux\JustBetweenUs.Linux.csproj", "{82F3D706-A9AC-46F4-9D9C-332667AE4A54}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.LinuxX11", "CodeBrixPlatform\JustBetweenUs.LinuxX11\JustBetweenUs.LinuxX11.csproj", "{82F3D706-A9AC-46F4-9D9C-332667AE4A54}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.LinuxFrameBuffer", "CodeBrixPlatform\JustBetweenUs.LinuxFrameBuffer\JustBetweenUs.LinuxFrameBuffer.csproj", "{4A6CB388-8DFF-AE24-6A2E-F7C5CBDC7D5D}"
 EndProject
