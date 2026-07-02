@@ -1,4 +1,6 @@
-﻿using JustBetweenUs.Encryption;
+﻿using CodeBrix.Platform.Simple;
+using JustBetweenUs.Encryption;
+using JustBetweenUs.Helpers;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -20,7 +22,7 @@ public partial class App : Application
     /// </summary>
     public App()
     {
-        SimpleServiceResolver.CreateInstance(services =>
+        SimpleServiceResolver.CreateInstance(HostHelper.GetHost(), services =>
         {
             //Register my custom services here
             services.AddEncryption();

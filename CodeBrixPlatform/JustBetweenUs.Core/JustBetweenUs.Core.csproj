@@ -9,6 +9,7 @@
     <DefineConstants>$(DefineConstants);HAS_CODEBRIX;HAS_CODEBRIX_WINUI;RESOLVE_SERVICES;SIMPLE_ENUM;SIMPLE_MESSAGING</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\Shared\Helpers\HostHelper.cs" Link="Helpers\HostHelper.cs" />
     <Compile Include="..\..\Shared\ViewModels\EncryptionMode.cs" Link="ViewModels\EncryptionMode.cs" />
     <Compile Include="..\..\Shared\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
   </ItemGroup>

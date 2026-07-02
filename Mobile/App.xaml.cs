@@ -1,4 +1,6 @@
-﻿using JustBetweenUs.Encryption;
+﻿using CodeBrix.Platform.Simple;
+using JustBetweenUs.Encryption;
+using JustBetweenUs.Helpers;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 
@@ -11,7 +13,7 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
-        SimpleServiceResolver.CreateInstance(services =>
+        SimpleServiceResolver.CreateInstance(HostHelper.GetHost(), services =>
         {
             //Register my custom services here
             services.AddEncryption();

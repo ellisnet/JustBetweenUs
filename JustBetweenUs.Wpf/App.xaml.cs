@@ -1,4 +1,6 @@
-﻿using JustBetweenUs.Encryption;
+﻿using CodeBrix.Platform.Simple;
+using JustBetweenUs.Encryption;
+using JustBetweenUs.Helpers;
 using System.Windows;
 
 namespace JustBetweenUs;
@@ -10,7 +12,7 @@ public partial class App : Application
 {
     public App()
     {
-        SimpleServiceResolver.CreateInstance(services =>
+        SimpleServiceResolver.CreateInstance(HostHelper.GetHost(), services =>
         {
             //Register my custom services here
             services.AddEncryption();

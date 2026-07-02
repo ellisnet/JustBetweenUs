@@ -89,12 +89,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Include="..\Shared\Helpers\HostHelper.cs" Link="Helpers\HostHelper.cs" />
 	  <Compile Include="..\Shared\ViewModels\EncryptionMode.cs" Link="ViewModels\EncryptionMode.cs" />
 	  <Compile Include="..\Shared\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
-	  <Compile Include="..\Shared\ViewModels\SimpleViewModel.cs" Link="ViewModels\SimpleViewModel.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="CodeBrix.Platform.Mobile.ApacheLicenseForever" Version="1.0.183.475" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.9" />
@@ -105,6 +106,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Helpers\" />
 	  <Folder Include="ViewModels\" />
 	</ItemGroup>
 

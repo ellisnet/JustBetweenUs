@@ -1,14 +1,11 @@
-﻿using JustBetweenUs.Encryption.Services;
+﻿using CodeBrix.Platform.Simple;
+using JustBetweenUs.Encryption.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-#if HAS_CODEBRIX
-using CodeBrix.Platform.Simple;
-#endif
 
 // ReSharper disable once CheckNamespace
 namespace JustBetweenUs.ViewModels;
