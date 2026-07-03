@@ -19,7 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7F440D69
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JustBetweenUs.Encryption.Tests", "Tests\JustBetweenUs.Encryption.Tests\JustBetweenUs.Encryption.Tests.csproj", "{B9210CF6-84A3-4D57-86B6-E4E2BD016A43}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JustBetweenUs.WinUi", "JustBetweenUs.WinUi\JustBetweenUs.WinUi.csproj", "{7C4CEB89-1BC8-4F52-86D1-FAEE3D16C2EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JustBetweenUs.WinUI", "JustBetweenUs.WinUI\JustBetweenUs.WinUI.csproj", "{7C4CEB89-1BC8-4F52-86D1-FAEE3D16C2EF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CodeBrixPlatform", "CodeBrixPlatform", "{8A752639-0C89-4EA0-B926-25915690EEEC}"
 EndProject
@@ -33,16 +33,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.LinuxWayland"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.LinuxFrameBuffer", "CodeBrixPlatform\JustBetweenUs.LinuxFrameBuffer\JustBetweenUs.LinuxFrameBuffer.csproj", "{4A6CB388-8DFF-AE24-6A2E-F7C5CBDC7D5D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.MacOs", "CodeBrixPlatform\JustBetweenUs.MacOs\JustBetweenUs.MacOs.csproj", "{EC432886-B362-B8EA-EDDE-818E9F134180}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.MacOS", "CodeBrixPlatform\JustBetweenUs.MacOS\JustBetweenUs.MacOS.csproj", "{EC432886-B362-B8EA-EDDE-818E9F134180}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.Windows", "CodeBrixPlatform\JustBetweenUs.Windows\JustBetweenUs.Windows.csproj", "{68E2144E-728C-14C5-9080-64BC4E2F1039}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.Win32Skia", "CodeBrixPlatform\JustBetweenUs.Win32Skia\JustBetweenUs.Win32Skia.csproj", "{68E2144E-728C-14C5-9080-64BC4E2F1039}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Assets", "Shared Assets", "{74072EA2-EC24-49F6-A19D-8CDECE8ACDCC}"
 	ProjectSection(SolutionItems) = preProject
 		Shared\Assets\star_icon.json = Shared\Assets\star_icon.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.WpfSkia", "CodeBrixPlatform\JustBetweenUs.WpfSkia\JustBetweenUs.WpfSkia.csproj", "{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.WinWpfSkia", "CodeBrixPlatform\JustBetweenUs.WinWpfSkia\JustBetweenUs.WinWpfSkia.csproj", "{AB910B4B-5B33-4AC6-A177-48F5EAFCEC99}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

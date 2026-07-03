@@ -25,9 +25,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.LinuxWayland"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.LinuxFrameBuffer", "CodeBrixPlatform\JustBetweenUs.LinuxFrameBuffer\JustBetweenUs.LinuxFrameBuffer.csproj", "{4A6CB388-8DFF-AE24-6A2E-F7C5CBDC7D5D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.MacOs", "CodeBrixPlatform\JustBetweenUs.MacOs\JustBetweenUs.MacOs.csproj", "{EC432886-B362-B8EA-EDDE-818E9F134180}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.MacOS", "CodeBrixPlatform\JustBetweenUs.MacOS\JustBetweenUs.MacOS.csproj", "{EC432886-B362-B8EA-EDDE-818E9F134180}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.Windows", "CodeBrixPlatform\JustBetweenUs.Windows\JustBetweenUs.Windows.csproj", "{68E2144E-728C-14C5-9080-64BC4E2F1039}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustBetweenUs.Win32Skia", "CodeBrixPlatform\JustBetweenUs.Win32Skia\JustBetweenUs.Win32Skia.csproj", "{68E2144E-728C-14C5-9080-64BC4E2F1039}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Assets", "Shared Assets", "{74072EA2-EC24-49F6-A19D-8CDECE8ACDCC}"
 	ProjectSection(SolutionItems) = preProject

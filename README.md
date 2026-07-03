@@ -56,12 +56,12 @@ on every platform, rendered through Skia by the `CodeBrix.Platform.*` framework:
 
 | Project | Platform / windowing |
 | --- | --- |
-| `JustBetweenUs.Windows` | Windows, native Win32 window |
-| `JustBetweenUs.WpfSkia` | Windows, Skia rendering hosted in a WPF window |
+| `JustBetweenUs.Win32Skia` | Windows, native Win32 window |
+| `JustBetweenUs.WinWpfSkia` | Windows, Skia rendering hosted in a WPF window |
 | `JustBetweenUs.LinuxX11` | Linux desktop, X11 |
 | `JustBetweenUs.LinuxWayland` | Linux desktop, Wayland |
 | `JustBetweenUs.LinuxFrameBuffer` | Linux, direct framebuffer (no display server — kiosk/embedded scenarios) |
-| `JustBetweenUs.MacOs` | macOS |
+| `JustBetweenUs.MacOS` | macOS |
 
 Each head is a tiny `Program.cs` that selects its platform host and runs the shared
 app:
@@ -89,7 +89,7 @@ packages layered on top:
 
 | Project | UI stack | CodeBrix packages used |
 | --- | --- | --- |
-| `JustBetweenUs.WinUi` | WinUI 3 (Windows App SDK) | `CodeBrix.Platform.WinUI.ApacheLicenseForever` (MVVM), `...WinUI.Skia...` (SVG image controls), `...WinUI.Lottie...` (Lottie player) |
+| `JustBetweenUs.WinUI` | WinUI 3 (Windows App SDK) | `CodeBrix.Platform.WinUI.ApacheLicenseForever` (MVVM), `...WinUI.Skia...` (SVG image controls), `...WinUI.Lottie...` (Lottie player) |
 | `JustBetweenUs.Wpf` | WPF | `CodeBrix.Platform.WPF.ApacheLicenseForever` (MVVM) |
 | `Mobile/` (`JustBetweenUs.Mobile`) | .NET MAUI (Android, iOS, Mac Catalyst, Windows) | `CodeBrix.Platform.Mobile.ApacheLicenseForever` (MVVM) |
 
@@ -109,7 +109,7 @@ xmlns:controls="using:CodeBrix.Platform.WinUI.Controls"
 xmlns:lottie="using:CodeBrix.Platform.WinUI.Lottie"
 
 <controls:EmbeddedImageButton
-    ImageUriSource="embedded://JustBetweenUs.WinUi/JustBetweenUs.WinUi.Assets.padlock-icon.svg"
+    ImageUriSource="embedded://JustBetweenUs.WinUI/JustBetweenUs.WinUI.Assets.padlock-icon.svg"
     Text="Encrypt" ImagePosition="Top" />
 
 <lottie:AnimatedVisualPlayer AutoPlay="True">
@@ -210,14 +210,14 @@ JustBetweenUs.Macos.sln            macOS development
 ├─ CodeBrixPlatform/               The Skia-based (CodeBrix.Platform UI) applications
 │   ├─ JustBetweenUs.UI/           Shared XAML UI (shared project)
 │   ├─ JustBetweenUs.Core/         Shared app library + CodeBrix.Platform packages
-│   ├─ JustBetweenUs.Windows/      Win32 head
-│   ├─ JustBetweenUs.WpfSkia/      WPF-hosted Skia head
+│   ├─ JustBetweenUs.Win32Skia/      Win32 head
+│   ├─ JustBetweenUs.WinWpfSkia/      WPF-hosted Skia head
 │   ├─ JustBetweenUs.LinuxX11/     Linux X11 head
 │   ├─ JustBetweenUs.LinuxWayland/ Linux Wayland head
 │   ├─ JustBetweenUs.LinuxFrameBuffer/  Linux framebuffer head
-│   └─ JustBetweenUs.MacOs/        macOS head
+│   └─ JustBetweenUs.MacOS/        macOS head
 │
-├─ JustBetweenUs.WinUi/            Native WinUI 3 app (CodeBrix.Platform.WinUI.* packages)
+├─ JustBetweenUs.WinUI/            Native WinUI 3 app (CodeBrix.Platform.WinUI.* packages)
 ├─ JustBetweenUs.Wpf/              Native WPF app (CodeBrix.Platform.WPF package)
 ├─ Mobile/                         .NET MAUI app (CodeBrix.Platform.Mobile package)
 │
