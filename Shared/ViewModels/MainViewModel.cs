@@ -49,7 +49,13 @@ public class MainViewModel : SimpleViewModel, ICopyToClipboard
                 var defaultKey = await _encryptSvc.GetDefaultKey();
                 //We can't set a value to EncryptionKey except on the main (UI) thread, because this causes problems on Linux and macOS
                 InvokeOnMainThread(() => EncryptionKey = defaultKey);
+#if HAS_WINUI
+                //Give it a bit more time on WinUI (native) because the Lottie animation stuff can take a little longer for the UI to be
+                //  ready, especially when the solution has recently been cloned and Visual Studio is setting things up for the first time.
+                await Task.Delay(3000);
+#else
                 await Task.Delay(2000);
+#endif
                 await ShowInfo("This application is adapted from a sample provided by Paul Ainsworth.");
             }).Start();
         }
