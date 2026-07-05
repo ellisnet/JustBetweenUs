@@ -52,10 +52,18 @@ public class MainViewModel : SimpleViewModel, ICopyToClipboard
 #if HAS_WINUI
                 //Give it a bit more time on WinUI (native) because the Lottie animation stuff can take a little longer for the UI to be
                 //  ready, especially when the solution has recently been cloned and Visual Studio is setting things up for the first time.
-                await Task.Delay(3000);
+                await Task.Delay(3000);  //This time can be adjusted to longer, if need be, for testing the JustBetweenUs.WinUI version.
 #else
                 await Task.Delay(2000);
 #endif
+                //IMPORTANT NOTE: If you get an exception here about a missing XamlRoot when you are first running JustBetweenUs.WinUI via
+                //  Visual Studio on Windows - *especially* after you just cloned the repository, or deleted your local .vs cache folder -
+                //  this is a known issue.
+                //  The problem is that the application takes long enough to draw the UI for the first time, that the Time.Delay(3000) -
+                //  i.e. 3 seconds - expires before the UI is ready - generally only in JustBetweenUs.WinUI.  Rebuild the application and
+                //  try running again.
+                //  TODO: a future version of CodeBrix will solve this problem by having a Task to await that only completes when the page
+                //  has fully loaded - and then the XamlRoot will never be missing.
                 await ShowInfo("This application is adapted from a sample provided by Paul Ainsworth.");
             }).Start();
         }
