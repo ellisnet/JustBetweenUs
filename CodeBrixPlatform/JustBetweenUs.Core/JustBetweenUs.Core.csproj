@@ -20,11 +20,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.9" />
-    <PackageReference Include="CodeBrix.Platform.ApacheLicenseForever" Version="1.0.189.446" />
-    <PackageReference Include="CodeBrix.Platform.Graphics2DSK.ApacheLicenseForever" Version="1.0.189.446" />
+    <PackageReference Include="CodeBrix.Platform.ApacheLicenseForever" Version="1.0.193.1124" />
+    <PackageReference Include="CodeBrix.Platform.Graphics2DSK.ApacheLicenseForever" Version="1.0.193.1124" />
 
     <!-- Lottie/Skottie animation support -->
-    <PackageReference Include="CodeBrix.Platform.Lottie.ApacheLicenseForever" Version="1.0.189.446" />
+    <PackageReference Include="CodeBrix.Platform.Lottie.ApacheLicenseForever" Version="1.0.193.1124" />
     <PackageReference Include="SkiaSharp.Skottie" Version="4.150.0" />
     <PackageReference Include="CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever" Version="4.150.0" />
 
@@ -33,7 +33,7 @@
 
     <!-- SVG rendering support for SvgImageSource on Skia targets -->
     <PackageReference Include="CodeBrix.SkiaSvg.MitLicenseForever" Version="1.0.180.239" />
-    <PackageReference Include="CodeBrix.Platform.Svg.ApacheLicenseForever" Version="1.0.189.446" />
+    <PackageReference Include="CodeBrix.Platform.Svg.ApacheLicenseForever" Version="1.0.193.1124" />
   </ItemGroup>
 
   <ItemGroup>
