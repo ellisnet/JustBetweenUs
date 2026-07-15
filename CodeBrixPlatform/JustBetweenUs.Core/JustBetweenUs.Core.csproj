@@ -25,8 +25,8 @@
 
     <!-- Lottie/Skottie animation support -->
     <PackageReference Include="CodeBrix.Platform.Lottie.ApacheLicenseForever" Version="1.0.193.1124" />
-    <PackageReference Include="SkiaSharp.Skottie" Version="4.150.0" />
-    <PackageReference Include="CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever" Version="4.150.0" />
+    <PackageReference Include="SkiaSharp.Skottie" Version="4.150.1" />
+    <PackageReference Include="CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever" Version="4.150.1" />
 
     <!-- Bundled Open Sans font -->
     <PackageReference Include="CodeBrix.Platform.Fonts.OpenSans.ApacheLicenseForever" Version="1.0.181.655" />
